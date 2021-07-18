@@ -8,7 +8,11 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "lib": ["esnext", "dom"]
+    "lib": ["esnext", "dom"],
+    "baseUrl": ".",
+    "paths": {
+      "@": ["./page"]
+    }
   },
   "include": ["page/**/*.ts", "page/**/*.d.ts", "page/**/*.tsx", "page/**/*.vue"]
 }

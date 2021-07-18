@@ -4,6 +4,12 @@ const { resolve } = require('path')
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  resolve: {
+    alias: {
+      // 'vue': 'vue/dist/vue.esm-bundler.js',
+      "@": resolve(__dirname, "page"),
+    },
+  },
   plugins: [vue()],
   build: {
     outDir: '../out_page',

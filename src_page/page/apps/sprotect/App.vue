@@ -1,17 +1,15 @@
 <template>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="sprotect" />
+    <div class="absolute w-full h-full">
+        <router-view></router-view>
+    </div>
+    
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import HelloWorld from "../../components/HelloWorld.vue";
 
 export default defineComponent({
     name: "App",
-    components: {
-        HelloWorld,
-    },
 });
 </script>
 
@@ -22,6 +20,5 @@ export default defineComponent({
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 60px;
 }
 </style>
