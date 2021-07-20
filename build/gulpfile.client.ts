@@ -22,13 +22,11 @@ function execFn(execStr: string): () => Promise<void> {
 
 function copyJs(): () => Promise<void> {
     return () => new Promise<void>(resolve => {
-        gulp.src('./src/**/*.js')
+        gulp.src(['./src/**/*.js', './src/**/*.html'])
             .pipe(gulp.dest('./out_client'))
         resolve()
     })
 }
-
-
 
 const buildClientTask = task.define('build-client', task.series(
     util.rimraf(path.join(__dirname, '../out_client')),

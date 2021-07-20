@@ -19,7 +19,7 @@ function execFn(execStr) {
 }
 function copyJs() {
     return () => new Promise(resolve => {
-        gulp.src('./src/**/*.js')
+        gulp.src(['./src/**/*.js', './src/**/*.html'])
             .pipe(gulp.dest('./out_client'));
         resolve();
     });
