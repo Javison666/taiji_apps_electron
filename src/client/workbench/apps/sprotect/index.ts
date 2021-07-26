@@ -16,7 +16,7 @@ class SprotectApp {
 		logger.info('sprotect-app startup success!')
 		const win = new BrowserWindow({ show: false })
 		win.once('ready-to-show', () => {
-			win.show()
+			// win.show()
 		})
 		win.loadURL(StaticPageResourceServer.INSTANCE.getAppNameServerAddr(AppItemName.Sprotect))
 	}

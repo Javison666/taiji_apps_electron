@@ -105,9 +105,9 @@
 			require,
 			/** @type {typeof import('path')} */ path,
 			/** @type {typeof import('os')} */ os,
-			/** @type {typeof import('../../../base/common/network')} */ network,
-			/** @type {typeof import("../../../base/common/resources")} */ resources,
-			/** @type {typeof import("../../../base/common/process")} */ process
+			/** //@type {typeof import('../../../base/common/network')} */ network,
+			/** //@type {typeof import("../../../base/common/resources")} */ resources,
+			/** //@type {typeof import("../../../base/common/process")} */ process
 		) {
 			const rootPath = resources.dirname(network.FileAccess.asFileUri('', require));
 			const pkg = require.__$__nodeRequire(resources.joinPath(rootPath, 'package.json').fsPath);
@@ -119,7 +119,7 @@
 		const path = require('path');
 		const os = require('os');
 
-		module.exports = factory(path, os, pkg.name, process.env['VSCODE_CWD'] || process.cwd()); // commonjs
+		module.exports = factory(path, os, pkg.name, process.env['CLIENT_CWD'] || process.cwd()); // commonjs
 	} else {
 		throw new Error('Unknown context');
 	}

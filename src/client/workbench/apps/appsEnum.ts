@@ -4,6 +4,7 @@ export interface IAppConfiguraiton {
 }
 
 export enum AppItemName {
+	Shared_Process = 'Shared_Process',
 	Sprotect = 'Sprotect',
 	Mock_Websocket = 'Mock_Websocket',
 	Ding_robot = 'Ding_robot',

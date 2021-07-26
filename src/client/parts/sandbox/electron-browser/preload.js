@@ -9,6 +9,8 @@
 
 	const { ipcRenderer, webFrame, contextBridge } = require('electron');
 
+	ipcRenderer.send('client:openDevTools');
+
 	//#region Utilities
 
 	/**
@@ -16,7 +18,7 @@
 	 * @returns {true | never}
 	 */
 	function validateIPC(channel) {
-		if (!channel || !channel.startsWith('vscode:')) {
+		if (!channel || !channel.startsWith('client:')) {
 			throw new Error(`Unsupported event IPC channel '${channel}'`);
 		}
 
@@ -62,7 +64,7 @@
 
 	/** //@type {Promise<ISandboxConfiguration>} */
 	const resolveConfiguration = (async () => {
-		const windowConfigIpcChannel = parseArgv('vscode-window-config');
+		const windowConfigIpcChannel = parseArgv('client-window-config');
 		if (!windowConfigIpcChannel) {
 			throw new Error('Preload: did not find expected vscode-window-config in renderer process arguments list.');
 		}
@@ -109,7 +111,7 @@
 		// `shellEnv` from the main side
 		const [userEnv, shellEnv] = await Promise.all([
 			(async () => (await resolveConfiguration).userEnv)(),
-			ipcRenderer.invoke('vscode:fetchShellEnv')
+			ipcRenderer.invoke('client:fetchShellEnv')
 		]);
 
 		return { ...process.env, ...shellEnv, ...userEnv };
@@ -232,6 +234,19 @@
 					ipcRenderer.on(channelResponse, responseListener);
 					ipcRenderer.send(channelRequest, requestNonce);
 				}
+			},
+
+			connectApp(appName, channelResponse) {
+				ipcRenderer.once('proxy-apps-channel-event', (event) => {
+					// Once we receive the reply, we can take the port...
+					const [port] = event.ports
+					// ... register a handler to receive results ...
+					port.onmessage = (event) => {
+						console.log('received result:', event.data)
+					}
+					// ... and start sending it work!
+					port.postMessage(21)
+				})
 			}
 		},
 
@@ -275,7 +290,7 @@
 			 * @returns {string}
 			 */
 			cwd() {
-				return process.env['VSCODE_CWD'] || process.execPath.substr(0, process.execPath.lastIndexOf(process.platform === 'win32' ? '\\' : '/'));
+				return process.env['CLINET_CWD'] || process.execPath.substr(0, process.execPath.lastIndexOf(process.platform === 'win32' ? '\\' : '/'));
 			},
 
 			/**

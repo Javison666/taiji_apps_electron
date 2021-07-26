@@ -2,6 +2,7 @@ import { app, session } from 'electron';
 import LoginBench from 'client/workbench/main/loginBench'
 import logger from 'client/common/log'
 import StaticPageResourceServer from 'client/workbench/static_resource/staticPageResourceServer'
+import { ClientApplication } from './app'
 
 class EntryMainProcess {
 
@@ -28,6 +29,8 @@ class EntryMainProcess {
 		})
 
 		StaticPageResourceServer.INSTANCE.main()
+
+		await ClientApplication.INSTANCE.startup()
 
 		logger.info('EntryMainProcess startup success!')
 		// 进入登录UI
