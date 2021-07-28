@@ -23,7 +23,7 @@ class EntryMainProcess {
 			callback({
 				responseHeaders: {
 					...details.responseHeaders,
-					'Content-Security-Policy': ['default-src \'self\'']
+					'Content-Security-Policy': ['default-src \'self\' \'unsafe-inline\' \'unsafe-eval\'']
 				}
 			})
 		})

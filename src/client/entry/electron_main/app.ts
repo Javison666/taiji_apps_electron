@@ -2,6 +2,7 @@ import { ipcMain, MessageChannelMain, BrowserWindow } from 'electron'
 import { onUnexpectedError } from 'client/base/common/errors'
 import logger from 'client/common/log'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
+import { SharedProcess } from 'client/platform/sharedProcess/electron-main/sharedProcess'
 
 /**
  * The main client application. There will only ever be one instance,
@@ -15,6 +16,7 @@ export class ClientApplication {
 	async startup(): Promise<void> {
 
 		this.registerListeners()
+		this.launchProcess()
 
 		// logger.debug(`from: ${this.environmentMainService.appRoot}`);
 		// logger.debug('args:', this.environmentMainService.args);
@@ -27,6 +29,14 @@ export class ClientApplication {
 		// const machineId = await this.resolveMachineId();
 		// logger.info(`Resolved machine identifier: ${machineId}`);
 
+	}
+
+
+	private async launchProcess(): Promise<void> {
+		const sharedProcess = new SharedProcess();
+		logger.info('SharedProcess start connect!');
+		await sharedProcess.connect();
+		logger.info('SharedProcess connect success!');
 	}
 
 	private registerListeners(): void {
@@ -53,6 +63,7 @@ export class ClientApplication {
 				// without going through the main process!
 			}
 		})
+		logger.info('ClientApplication registerListeners success!');
 	}
 
 	private onUnexpectedError(err: Error): void {

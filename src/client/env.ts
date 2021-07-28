@@ -2,6 +2,8 @@ const {
     app
 } = require('electron');
 
+export const OutClientDir = 'out_client'
+
 export const AppName = 'Chrome'
 
 export const AppName_en = "Chrome"

@@ -4,9 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { BrowserWindow, ipcMain, Event as ElectronEvent, IpcMainEvent } from 'electron';
-import * as path from 'path'
 import { ClientApplication } from 'client/entry/electron_main/app'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
+import { fileFromClientResource } from 'client/base/common/network'
 // import { connect as connectMessagePort } from 'vs/base/parts/ipc/electron-main/ipc.mp';
 // import { assertIsDefined } from 'vs/base/common/types';
 
@@ -25,7 +25,7 @@ export class SharedProcess {
 		// Lifecycle
 
 		// Shared process connections from workbench windows
-		ipcMain.on('vscode:createSharedProcessMessageChannel', async (e, nonce: string) => this.onWindowConnection(e, nonce));
+		ipcMain.on('client:createSharedProcessMessageChannel', async (e, nonce: string) => this.onWindowConnection(e, nonce));
 	}
 
 	private async onWindowConnection(e: IpcMainEvent, nonce: string): Promise<void> {
@@ -107,7 +107,7 @@ export class SharedProcess {
 				this.registerWindowListeners();
 
 				// Wait for window indicating that IPC connections are accepted
-				await new Promise<void>(resolve => ipcMain.once('vscode:shared-process->electron-main=ipc-ready', () => {
+				await new Promise<void>(resolve => ipcMain.once('client:shared-process->electron-main=ipc-ready', () => {
 					// this.logService.trace('SharedProcess: IPC ready');
 
 					resolve();
@@ -122,23 +122,24 @@ export class SharedProcess {
 
 		// shared process is a hidden window by default
 		this.window = new BrowserWindow({
-			show: false,
+			show: true,
 			webPreferences: {
-				nodeIntegration: true,
-				contextIsolation: false,
-				enableWebSQL: false,
-				spellcheck: false,
-				nativeWindowOpen: true,
-				images: false,
-				webgl: false,
-				disableBlinkFeatures: 'Auxclick' // do NOT change, allows us to identify this window as shared-process in the process explorer
+				// preload: fileFromClientResource('client/base/parts/sandbox/electron-browser/preload.js'),
+				// nodeIntegration: true,
+				// contextIsolation: false,
+				// enableWebSQL: false,
+				// spellcheck: false,
+				// nativeWindowOpen: true,
+				// images: false,
+				// webgl: false,
+				// disableBlinkFeatures: 'Auxclick' // do NOT change, allows us to identify this window as shared-process in the process explorer
 			}
 		});
 
 		ClientApplication.INSTANCE.windowAppsMap.set(AppItemName.Shared_Process, this.window)
-
 		// Load with config
-		this.window.loadURL(path.join(process.cwd(), 'out_client/client/electron-browser/sharedProcess/sharedProcess.html').toString());
+		this.window.loadFile(fileFromClientResource('client/entry/electron_browser/sharedProcess/sharedProcess.html'));
+		this.window.webContents.openDevTools();
 	}
 
 	private registerWindowListeners(): void {
