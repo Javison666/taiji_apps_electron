@@ -3,9 +3,8 @@ export { };
 import nodeStorage from 'client/base/electron/nodeStorage'
 import { createBrowserWindow, createPdfWindow } from 'client/base/electron/createWindow'
 import { App_Browser_Win_list } from 'client/instance'
-import { registerSessionDownload } from 'client/parts/download'
+import { registerSessionDownload } from 'client/base/parts/download'
 import { handleArgv, opSet } from './utils'
-import IpcMainRegisters from 'client/ipc/ipcmain'
 
 const { ipcMain, app, session } = require('electron');
 
@@ -139,7 +138,5 @@ export default () => {
     app.on('window-all-closed', () => { app.quit(); })
 
     app.on('activate', () => { })
-
-    IpcMainRegisters()
 
 }

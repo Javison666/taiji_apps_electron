@@ -16,7 +16,7 @@
 
 	// Browser
 	else {
-		globalThis.MonacoBootstrap = factory();
+		globalThis.ClientBootstrap = factory();
 	}
 }(this, function () {
 	const Module = typeof require === 'function' ? require('module') : undefined;
@@ -182,7 +182,7 @@
 	function safeSandboxGlobals() {
 		const globals = (typeof self === 'object' ? self : typeof global === 'object' ? global : {});
 
-		return globals.vscode;
+		return globals.client;
 	}
 
 	/**
@@ -220,7 +220,7 @@
 	async function safeReadNlsFile(...pathSegments) {
 		const ipcRenderer = safeIpcRenderer();
 		if (ipcRenderer) {
-			return ipcRenderer.invoke('vscode:readNlsFile', ...pathSegments);
+			return ipcRenderer.invoke('client:readNlsFile', ...pathSegments);
 		}
 
 		if (fs && path) {

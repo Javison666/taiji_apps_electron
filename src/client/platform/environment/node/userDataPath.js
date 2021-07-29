@@ -49,13 +49,13 @@
 		function doGetUserDataPath(cliArgs) {
 
 			// 1. Support portable mode
-			const portablePath = process.env['VSCODE_PORTABLE'];
+			const portablePath = process.env['CLIENT_PORTABLE'];
 			if (portablePath) {
 				return path.join(portablePath, 'user-data');
 			}
 
 			// 2. Support global VSCODE_APPDATA environment variable
-			let appDataPath = process.env['VSCODE_APPDATA'];
+			let appDataPath = process.env['CLIENT_APPDATA'];
 			if (appDataPath) {
 				return path.join(appDataPath, productName);
 			}

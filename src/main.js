@@ -44,8 +44,8 @@ function startup(codeCachePath) {
 
 	// Load main in AMD
 	require('./client/entry/electron_main/main')
-	// require('./bootstrap-amd').load('client/code/electron-main/main', () => {
-	// 	// perf.mark('code/didLoadMainBundle');
+	// require('./bootstrap_amd').load('./client/entry/electron_main/main', () => {
+	// 	perf.mark('code/didLoadMainBundle');
 	// });
 }
 

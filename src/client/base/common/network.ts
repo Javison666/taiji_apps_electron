@@ -6,6 +6,7 @@
 import { URI } from 'client/base/common/uri';
 import * as platform from 'client/base/common/platform';
 import * as path from 'path'
+import { app } from 'electron'
 import { OutClientDir } from 'client/env'
 
 export namespace Schemas {
@@ -207,3 +208,6 @@ class FileAccessImpl {
 export const FileAccess = new FileAccessImpl();
 
 export const fileFromClientResource = (filePath: string) => path.join(process.cwd(), `./${OutClientDir}/${filePath}`)
+export const fileFromUserData = (filePath: string) => {
+	return path.join(app.getPath('userData'), filePath)
+}

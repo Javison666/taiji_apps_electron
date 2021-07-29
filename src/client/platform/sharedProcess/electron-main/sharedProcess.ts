@@ -7,6 +7,7 @@ import { BrowserWindow, ipcMain, Event as ElectronEvent, IpcMainEvent } from 'el
 import { ClientApplication } from 'client/entry/electron_main/app'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
 import { fileFromClientResource } from 'client/base/common/network'
+
 // import { connect as connectMessagePort } from 'vs/base/parts/ipc/electron-main/ipc.mp';
 // import { assertIsDefined } from 'vs/base/common/types';
 
@@ -109,7 +110,6 @@ export class SharedProcess {
 				// Wait for window indicating that IPC connections are accepted
 				await new Promise<void>(resolve => ipcMain.once('client:shared-process->electron-main=ipc-ready', () => {
 					// this.logService.trace('SharedProcess: IPC ready');
-
 					resolve();
 				}));
 			})();
@@ -119,20 +119,22 @@ export class SharedProcess {
 	}
 
 	private createWindow(): void {
+		// const configObjectUrl = this._register(this.protocolMainService.createIPCObjectUrl<ISharedProcessConfiguration>());
 
 		// shared process is a hidden window by default
 		this.window = new BrowserWindow({
 			show: true,
 			webPreferences: {
-				// preload: fileFromClientResource('client/base/parts/sandbox/electron-browser/preload.js'),
-				// nodeIntegration: true,
-				// contextIsolation: false,
-				// enableWebSQL: false,
-				// spellcheck: false,
-				// nativeWindowOpen: true,
-				// images: false,
-				// webgl: false,
-				// disableBlinkFeatures: 'Auxclick' // do NOT change, allows us to identify this window as shared-process in the process explorer
+				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
+				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`],
+				nodeIntegration: true,
+				contextIsolation: false,
+				enableWebSQL: false,
+				spellcheck: false,
+				nativeWindowOpen: true,
+				images: false,
+				webgl: false,
+				disableBlinkFeatures: 'Auxclick' // do NOT change, allows us to identify this window as shared-process in the process explorer
 			}
 		});
 

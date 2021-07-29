@@ -3,6 +3,7 @@ import { onUnexpectedError } from 'client/base/common/errors'
 import logger from 'client/common/log'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
 import { SharedProcess } from 'client/platform/sharedProcess/electron-main/sharedProcess'
+import LoginBench from 'client/workbench/main/loginBench'
 
 /**
  * The main client application. There will only ever be one instance,
@@ -37,6 +38,9 @@ export class ClientApplication {
 		logger.info('SharedProcess start connect!');
 		await sharedProcess.connect();
 		logger.info('SharedProcess connect success!');
+
+		// 进入登录UI
+		new LoginBench().main()
 	}
 
 	private registerListeners(): void {

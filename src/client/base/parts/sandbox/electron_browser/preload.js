@@ -61,9 +61,15 @@
 
 	/** //@type {ISandboxConfiguration | undefined} */
 	let configuration = undefined;
+	let appClientdir = undefined
 
 	/** //@type {Promise<ISandboxConfiguration>} */
 	const resolveConfiguration = (async () => {
+		appClientdir = parseArgv('client-window-config');
+		return {
+			appRoot: appClientdir
+		}
+
 		const windowConfigIpcChannel = parseArgv('client-window-config');
 		if (!windowConfigIpcChannel) {
 			throw new Error('Preload: did not find expected vscode-window-config in renderer process arguments list.');
@@ -106,12 +112,11 @@
 	 * @type {Promise<typeof process.env>}
 	 */
 	const resolveShellEnv = (async () => {
-
 		// Resolve `userEnv` from configuration and
-		// `shellEnv` from the main side
+		// `shellEnv` from the main sides
 		const [userEnv, shellEnv] = await Promise.all([
-			(async () => (await resolveConfiguration).userEnv)(),
-			ipcRenderer.invoke('client:fetchShellEnv')
+			// (async () => (await resolveConfiguration).userEnv)(),
+			// ipcRenderer.invoke('client:fetchShellEnv')
 		]);
 
 		return { ...process.env, ...shellEnv, ...userEnv };
@@ -340,6 +345,9 @@
 			 * ISandboxConfiguration | undefined
 			 */
 			configuration() {
+				return {
+					appRoot: appClientdir
+				}
 				return configuration;
 			},
 
@@ -359,7 +367,7 @@
 	// add to the DOM global.
 	if (process && process['contextIsolated']) {
 		try {
-			contextBridge.exposeInMainWorld('vscode', globals);
+			contextBridge.exposeInMainWorld('client', globals);
 		} catch (error) {
 			console.error(error);
 		}
