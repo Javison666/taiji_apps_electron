@@ -6,8 +6,9 @@
 import { URI } from 'client/base/common/uri';
 import * as platform from 'client/base/common/platform';
 import * as path from 'path'
-import { app } from 'electron'
+import { app, ipcRenderer } from 'electron'
 import { OutClientDir } from 'client/env'
+import * as fs from 'fs'
 
 export namespace Schemas {
 
@@ -207,7 +208,28 @@ class FileAccessImpl {
 
 export const FileAccess = new FileAccessImpl();
 
-export const fileFromClientResource = (filePath: string) => path.join(process.cwd(), `./${OutClientDir}/${filePath}`)
-export const fileFromUserData = (filePath: string) => {
-	return path.join(app.getPath('userData'), filePath)
+export const fileFromClientResource = (filePath: string) => {
+	return path.join(process.cwd(), `./${OutClientDir}/${filePath}`)
+}
+
+export const fileFromUserDataCommon = async (filePath: string) => {
+	let userDataPath = ''
+	if (app) {
+		userDataPath = app.getPath('userData')
+	} else {
+		userDataPath = await ipcRenderer.invoke('client:getPath', 'userData')
+
+	}
+	return path.join(userDataPath, filePath)
+}
+
+export const fileCreateIfNotExisted = (filePath: string) => {
+	if (!fs.existsSync(filePath)) {
+		let dir = path.join(filePath, '../')
+		if (!fs.existsSync(dir)) {
+			fs.mkdirSync(dir);
+		}
+		fs.openSync(filePath, 'w');
+	};
+
 }

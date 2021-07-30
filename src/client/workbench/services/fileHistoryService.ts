@@ -14,12 +14,14 @@ class FileHistoryService {
 
 	private async startup(): Promise<void> {
 		await ShareStorage.INSTANCE.execSql(
-			`create table if not exists file_history(app_name text, file_path text)`,
+			`create table if not exists file_history(app_name text, file_path text, update_time datetime)`,
 		)
 	}
 
-	async getFileHistotyList(appName: AppItemName): Promise<void> {
-		// ShareStorage.INSTANCE.allSql()
+	async getAppFileHistotyList(appName: AppItemName): Promise<void> {
+		return ShareStorage.INSTANCE.allSql(
+			`select * from file_history where app_name='${appName}'`
+		)
 	}
 }
 

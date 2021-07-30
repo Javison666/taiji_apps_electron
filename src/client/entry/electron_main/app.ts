@@ -1,4 +1,4 @@
-import { ipcMain, MessageChannelMain, BrowserWindow } from 'electron'
+import { ipcMain, MessageChannelMain, BrowserWindow, app } from 'electron'
 import { onUnexpectedError } from 'client/base/common/errors'
 import logger from 'client/common/log'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
@@ -44,6 +44,11 @@ export class ClientApplication {
 	}
 
 	private registerListeners(): void {
+		ipcMain.handle('client:getPath', async (event, pathName) => {
+			const result = app.getPath(pathName)
+			return result
+		})
+
 		process.on('uncaughtException', err => this.onUnexpectedError(err));
 		process.on('unhandledRejection', (reason: unknown) => onUnexpectedError(reason));
 
@@ -60,9 +65,9 @@ export class ClientApplication {
 				// Create a new channel ...
 				const { port1, port2 } = new MessageChannelMain()
 				// ... send one end to the worker ...
-				targetWindow.webContents.postMessage('proxy-apps-channel-event', null, [port1])
+				targetWindow.webContents.postMessage('proxy-apps-channel-event', appName, [port1])
 				// ... and the other end to the main window.
-				event.senderFrame.postMessage('provide-apps-channel-event', null, [port2])
+				event.senderFrame.postMessage('provide-apps-channel-event', appName, [port2])
 				// Now the main window and the worker can communicate with each other
 				// without going through the main process!
 			}

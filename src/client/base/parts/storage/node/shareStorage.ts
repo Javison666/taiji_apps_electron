@@ -1,4 +1,4 @@
-import { fileFromUserData } from 'client/base/common/network'
+import { fileFromUserDataCommon, fileCreateIfNotExisted } from 'client/base/common/network'
 const sqlite3 = require('sqlite3').verbose();
 
 class ShareStorage {
@@ -8,14 +8,17 @@ class ShareStorage {
 
 	async main(): Promise<void> {
 		try {
-			this.startup();
+			await this.startup();
 		} catch (error) {
 			console.error(error.message);
 		}
 	}
 
 	private async startup(): Promise<void> {
-		this._db = new sqlite3.Database(fileFromUserData('./storage/share_storage.db'))
+
+		let dbPath = await fileFromUserDataCommon('./storage/share_storage.db')
+		fileCreateIfNotExisted(dbPath)
+		this._db = new sqlite3.Database(dbPath)
 	}
 
 	async runSql(sql: string, params?: (string | number)[]): Promise<void> {
@@ -32,7 +35,7 @@ class ShareStorage {
 
 	async getSql<T>(sql: string, params?: (string | number)[]): Promise<T> {
 		return new Promise((resolve, reject) => {
-			this._db.run(sql, params, (error: any, row: T) => {
+			this._db.get(sql, params, (error: any, row: T) => {
 				if (error === null) {
 					resolve(row)
 				} else {
@@ -44,7 +47,7 @@ class ShareStorage {
 
 	async allSql<T>(sql: string, params?: (string | number)[]): Promise<T> {
 		return new Promise((resolve, reject) => {
-			this._db.run(sql, params, (error: any, rows: T) => {
+			this._db.all(sql, params, (error: any, rows: T) => {
 				if (error === null) {
 					resolve(rows)
 				} else {
@@ -56,7 +59,7 @@ class ShareStorage {
 
 	async eachSql<T>(sql: string, params?: (string | number)[], eachCb?: (error: any, row: T) => void): Promise<void> {
 		return new Promise((resolve) => {
-			this._db.run(sql, params, eachCb, () => {
+			this._db.each(sql, params, eachCb, () => {
 				resolve()
 			})
 		})
@@ -64,7 +67,7 @@ class ShareStorage {
 
 	async execSql<T>(sql: string): Promise<void> {
 		return new Promise((resolve, reject) => {
-			this._db.run(sql, (error: any) => {
+			this._db.exec(sql, (error: any) => {
 				if (error === null) {
 					resolve()
 				} else {

@@ -1,4 +1,7 @@
 import { ipcRenderer } from 'electron';
+import fileHistoryService from 'client/workbench/services/fileHistoryService'
+import { AppItemName } from 'client/workbench/apps/appsEnum'
+import ShareStorage from 'client/base/parts/storage/node/shareStorage'
 
 class SharedProcessMain {
 	async open(): Promise<void> {
@@ -8,21 +11,41 @@ class SharedProcessMain {
 	}
 
 	private async initServices(): Promise<void> {
-		// win.webContents.id
+		await ShareStorage.INSTANCE.main()
+		await fileHistoryService.INSTANCE.main()
 	}
 
 	private registerListeners(): void {
 
 		// 提供代理消息通道
-		ipcRenderer.on('provide-apps-channel-event', (event) => {
+		ipcRenderer.on('provide-apps-channel-event', (event, appName) => {
 			const [port] = event.ports
+			console.log(appName)
 			port.onmessage = (event) => {
+				const channelData = event.data
+				// const channelData = JSON.parse(event.data)
+				switch (channelData.channelType) {
+					case 'request-file-history':
+						this.requestFileHistory(appName, port, channelData)
+						break;
+					default:
+						break;
+				}
 				// The event data can be any serializable object (and the event could even
 				// carry other MessagePorts with it!)
 				port.postMessage({
 					type: 'share_process'
 				})
 			}
+		})
+	}
+
+	private async requestFileHistory(appName: AppItemName, port: MessagePort, channelData: any): Promise<void> {
+		const rows = await fileHistoryService.INSTANCE.getAppFileHistotyList(appName)
+		port.postMessage({
+			seq: channelData.seq,
+			type: 'response-file-history',
+			data: rows
 		})
 	}
 }

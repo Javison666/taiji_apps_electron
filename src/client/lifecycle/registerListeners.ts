@@ -3,7 +3,6 @@ export { };
 import nodeStorage from 'client/base/electron/nodeStorage'
 import { createBrowserWindow, createPdfWindow } from 'client/base/electron/createWindow'
 import { App_Browser_Win_list } from 'client/instance'
-import { registerSessionDownload } from 'client/base/parts/download'
 import { handleArgv, opSet } from './utils'
 
 const { ipcMain, app, session } = require('electron');
@@ -11,7 +10,6 @@ const { ipcMain, app, session } = require('electron');
 export default () => {
 
     app.on('session-created', (session: any) => {
-        registerSessionDownload(session)
     });
 
     ipcMain.on('synchronous-message', function (event: any, arg: string) {

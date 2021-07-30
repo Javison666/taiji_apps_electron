@@ -9,6 +9,11 @@
 
 	const { ipcRenderer, webFrame, contextBridge } = require('electron');
 
+	let seq = 1;
+	const seqCallback = {}
+	const appChannel = {}
+
+
 	ipcRenderer.send('client:openDevTools');
 
 	//#region Utilities
@@ -151,6 +156,18 @@
 
 		ipcRenderer: {
 
+			// sendProtocal(channel, ...args) {
+			// 	return new Promise(resolve => {
+			// 		if (validateIPC(channel)) {
+			// 			ipcRenderer.send(channel, seq, ...args);
+			// 			seqCallback[seq] = () => {
+			// 				resolve()
+			// 			}
+			// 			seq++
+			// 		}
+			// 	})
+			// },
+
 			/**
 			 * @param {string} channel
 			 * @param {any[]} args
@@ -241,16 +258,23 @@
 				}
 			},
 
-			connectApp(appName, channelResponse) {
-				ipcRenderer.once('proxy-apps-channel-event', (event) => {
-					// Once we receive the reply, we can take the port...
-					const [port] = event.ports
-					// ... register a handler to receive results ...
-					port.onmessage = (event) => {
-						console.log('received result:', event.data)
+			async connectApp(appName) {
+				return new Promise(resolve => {
+					appChannel[appName] = {
+						connectCb: () => {
+							resolve()
+						}
 					}
-					// ... and start sending it work!
-					port.postMessage(21)
+					ipcRenderer.send('proxy-apps-channel-request', appName)
+				})
+			},
+
+			async callApp(appName, data) {
+				return new Promise(resolve => {
+					seqCallback[seq] = (data) => { resolve(data) }
+					if (appChannel[appName].port) {
+						appChannel[appName].port.send(data)
+					}
 				})
 			}
 		},
@@ -361,6 +385,26 @@
 			}
 		}
 	};
+
+	ipcRenderer.on('proxy-apps-channel-event', (event, appName) => {
+		// Once we receive the reply, we can take the port...
+		console.log('proxy-apps-channel-event', event)
+		const [port] = event.ports
+		appChannel[appName].port = port
+		appChannel[appName].connectCb()
+		// ... register a handler to receive results ...
+		port.onmessage = (event) => {
+			const channelData = event.data
+			if (channelData.seq) {
+				seqCallback[seq](event.data)
+			}
+			// // const channelData = JSON.parse(event.data)
+			// if (channelData.appName) {
+			// 	appChannel[channelData.appName].channelResponse(channelData)
+			// }
+			console.log('received result:', event.data)
+		}
+	})
 
 	// Use `contextBridge` APIs to expose globals to VSCode
 	// only if context isolation is enabled, otherwise just
