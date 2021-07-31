@@ -29,6 +29,7 @@
                         <a
                             href="#"
                             class="font-medium text-purple-600 hover:text-purple-500 cursor-pointer"
+                            @click.prevent="showOpenDialog"
                         >
                             打开新的文件
                         </a>
@@ -41,7 +42,7 @@
                             帮助
                         </a>
                     </div>
-                    
+
                 </div>
             </div>
         </div>
@@ -56,6 +57,12 @@ export default {
     }),
     components: {
         ListRecentFiles,
+    },
+    methods: {
+        async showOpenDialog() {
+            const url = await client.ipcRenderer.showOpenDialog({ properties: ['openFile'] })
+            console.log(url)
+        }
     },
 };
 </script>

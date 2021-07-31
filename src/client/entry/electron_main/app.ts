@@ -1,4 +1,4 @@
-import { ipcMain, MessageChannelMain, BrowserWindow, app } from 'electron'
+import { ipcMain, MessageChannelMain, BrowserWindow, app, dialog } from 'electron'
 import { onUnexpectedError } from 'client/base/common/errors'
 import logger from 'client/common/log'
 import { AppItemName } from 'client/workbench/apps/appsEnum'
@@ -57,17 +57,26 @@ export class ClientApplication {
 
 		ipcMain.on('client:reloadWindow', event => event.sender.reload());
 
+		ipcMain.on('client:showOpenDialog', async (event, seq, options) => {
+			const url = await dialog.showOpenDialog(options)
+			event.senderFrame.postMessage('client:protocal-response', {
+				seq,
+				data: url
+			})
+		});
+
 		ipcMain.on('proxy-apps-channel-request', (event, appName: AppItemName) => {
 			// For security reasons, let's make sure only the frames we expect can
 			// access the worker.
 			const targetWindow = this.windowAppsMap.get(appName)
-			if (targetWindow && event.senderFrame === targetWindow.webContents.mainFrame) {
+
+			if (targetWindow) {
 				// Create a new channel ...
 				const { port1, port2 } = new MessageChannelMain()
 				// ... send one end to the worker ...
-				targetWindow.webContents.postMessage('proxy-apps-channel-event', appName, [port1])
+				targetWindow.webContents.postMessage('provide-apps-channel-event', appName, [port1])
 				// ... and the other end to the main window.
-				event.senderFrame.postMessage('provide-apps-channel-event', appName, [port2])
+				event.senderFrame.postMessage('proxy-apps-channel-event', appName, [port2])
 				// Now the main window and the worker can communicate with each other
 				// without going through the main process!
 			}

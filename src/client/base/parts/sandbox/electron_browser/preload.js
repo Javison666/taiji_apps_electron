@@ -13,6 +13,12 @@
 	const seqCallback = {}
 	const appChannel = {}
 
+	const registetSeq = (cbfn, runfn) => {
+		seqCallback[seq] = cbfn
+		runfn(seq)
+		seq++
+	}
+
 
 	ipcRenderer.send('client:openDevTools');
 
@@ -226,6 +232,17 @@
 
 					return this;
 				}
+			},
+
+			showOpenDialog(options) {
+				return new Promise(resolve => {
+					registetSeq(
+						(data) => { resolve(data) },
+						(_seq) => {
+							ipcRenderer.send('client:showOpenDialog', _seq, options);
+						}
+					)
+				})
 			}
 		},
 
@@ -262,18 +279,25 @@
 				return new Promise(resolve => {
 					appChannel[appName] = {
 						connectCb: () => {
+							console.log('[connect-to-app]', appName, 'success!')
 							resolve()
 						}
 					}
+					console.log('appChannel', appChannel)
 					ipcRenderer.send('proxy-apps-channel-request', appName)
 				})
 			},
 
 			async callApp(appName, data) {
 				return new Promise(resolve => {
-					seqCallback[seq] = (data) => { resolve(data) }
 					if (appChannel[appName].port) {
-						appChannel[appName].port.send(data)
+						registetSeq(
+							(cbData) => { resolve(cbData) },
+							(_seq) => {
+								data.seq = _seq
+								appChannel[appName].port.send(data)
+							})
+
 					}
 				})
 			}
@@ -387,8 +411,9 @@
 	};
 
 	ipcRenderer.on('proxy-apps-channel-event', (event, appName) => {
-		// Once we receive the reply, we can take the port...
-		console.log('proxy-apps-channel-event', event)
+		if (!appChannel[appName]) {
+			return
+		}
 		const [port] = event.ports
 		appChannel[appName].port = port
 		appChannel[appName].connectCb()
@@ -398,11 +423,12 @@
 			if (channelData.seq) {
 				seqCallback[seq](event.data)
 			}
-			// // const channelData = JSON.parse(event.data)
-			// if (channelData.appName) {
-			// 	appChannel[channelData.appName].channelResponse(channelData)
-			// }
-			console.log('received result:', event.data)
+		}
+	})
+
+	ipcRenderer.on('client:protocal-response', (event, protocal) => {
+		if (protocal && protocal.seq && protocal.data && seqCallback[protocal.seq]) {
+			seqCallback[protocal.seq](protocal.data)
 		}
 	})
 

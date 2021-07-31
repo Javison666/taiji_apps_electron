@@ -20,7 +20,7 @@ class SharedProcessMain {
 		// 提供代理消息通道
 		ipcRenderer.on('provide-apps-channel-event', (event, appName) => {
 			const [port] = event.ports
-			console.log(appName)
+			console.log('provide-apps-channel-event', appName)
 			port.onmessage = (event) => {
 				const channelData = event.data
 				// const channelData = JSON.parse(event.data)

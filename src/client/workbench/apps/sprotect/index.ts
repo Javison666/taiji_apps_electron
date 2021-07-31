@@ -17,6 +17,8 @@ class SprotectApp {
 		logger.info('sprotect-app startup success!')
 		const win = new BrowserWindow({
 			show: false,
+			width: 540,
+			height: 400,
 			webPreferences: {
 				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
 				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`],
@@ -25,6 +27,7 @@ class SprotectApp {
 				nativeWindowOpen: true,
 			}
 		})
+		// 540 400
 		win.once('ready-to-show', () => {
 			win.show()
 		})
