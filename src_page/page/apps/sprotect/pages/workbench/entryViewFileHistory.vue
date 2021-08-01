@@ -42,7 +42,6 @@
                             帮助
                         </a>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -60,9 +59,20 @@ export default {
     },
     methods: {
         async showOpenDialog() {
-            const url = await client.ipcRenderer.showOpenDialog({ properties: ['openFile'] })
-            console.log(url)
-        }
+            const res: any = await client.ipcRenderer.showOpenDialog({
+                properties: ["openFile"],
+            });
+            console.log("filePath res", res);
+            if (!res.canceled) {
+                await client.ipcMessagePort.callApp('Shared_Process', {
+                    channelType: 'fileHistory',
+                    channelCommond: 'addFileHistory',
+                    reqData: {
+                        filePath: res.filePaths[0],
+                    },
+                });
+            }
+        },
     },
 };
 </script>

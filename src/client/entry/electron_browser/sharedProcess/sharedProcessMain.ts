@@ -25,8 +25,8 @@ class SharedProcessMain {
 				const channelData = event.data
 				// const channelData = JSON.parse(event.data)
 				switch (channelData.channelType) {
-					case 'request-file-history':
-						this.requestFileHistory(appName, port, channelData)
+					case 'fileHistory':
+						this.handleFileHistoryEvent(appName, port, channelData)
 						break;
 					default:
 						break;
@@ -40,12 +40,11 @@ class SharedProcessMain {
 		})
 	}
 
-	private async requestFileHistory(appName: AppItemName, port: MessagePort, channelData: any): Promise<void> {
-		const rows = await fileHistoryService.INSTANCE.getAppFileHistotyList(appName)
+	private async handleFileHistoryEvent(appName: AppItemName, port: MessagePort, channelData: any): Promise<void> {
+		const rows = await fileHistoryService.INSTANCE.handleTask(appName, channelData)
 		port.postMessage({
 			seq: channelData.seq,
-			type: 'response-file-history',
-			data: rows
+			data: rows,
 		})
 	}
 }

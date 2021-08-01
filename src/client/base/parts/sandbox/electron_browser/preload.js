@@ -283,7 +283,6 @@
 							resolve()
 						}
 					}
-					console.log('appChannel', appChannel)
 					ipcRenderer.send('proxy-apps-channel-request', appName)
 				})
 			},
@@ -295,7 +294,8 @@
 							(cbData) => { resolve(cbData) },
 							(_seq) => {
 								data.seq = _seq
-								appChannel[appName].port.send(data)
+								console.log(appChannel)
+								appChannel[appName].port.postMessage(data)
 							})
 
 					}
@@ -420,15 +420,19 @@
 		// ... register a handler to receive results ...
 		port.onmessage = (event) => {
 			const channelData = event.data
-			if (channelData.seq) {
+			console.log('proxy-apps-channel-event', seqCallback)
+			if (channelData.seq && seqCallback[seq]) {
 				seqCallback[seq](event.data)
+				delete seqCallback[seq]
 			}
 		}
 	})
 
 	ipcRenderer.on('client:protocal-response', (event, protocal) => {
+		console.log('client:protocal-response', seqCallback)
 		if (protocal && protocal.seq && protocal.data && seqCallback[protocal.seq]) {
 			seqCallback[protocal.seq](protocal.data)
+			delete seqCallback[protocal.seq]
 		}
 	})
 
