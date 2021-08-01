@@ -21,7 +21,7 @@ class SprotectApp {
 			height: 400,
 			webPreferences: {
 				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
-				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`],
+				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--app-name=${AppItemName.Sprotect}`],
 				nodeIntegration: true,
 				contextIsolation: false,
 				nativeWindowOpen: true,

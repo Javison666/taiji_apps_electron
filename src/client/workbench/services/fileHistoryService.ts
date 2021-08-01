@@ -14,13 +14,14 @@ class FileHistoryService {
 
 	private async startup(): Promise<void> {
 		await ShareStorage.INSTANCE.execSql(
-			`create table if not exists file_history(app_name text, file_path text, update_time  TimeStamp NOT NULL DEFAULT (datetime('now','localtime')));`,
+			`create table if not exists file_history(id integer PRIMARY KEY autoincrement, app_name text, file_path text, update_time  TimeStamp NOT NULL DEFAULT (datetime('now','localtime')));`,
 		)
 	}
 
 	async handleTask(appName: AppItemName, channelData: { channelCommond: string, reqData: any }) {
-		console.log('handleTask', appName, channelData)
 		switch (channelData.channelCommond) {
+			case 'getFilesHistoryList':
+				return this.getFilesHistoryList(appName)
 			case 'addFileHistory':
 				return this.addFileHistory(appName, channelData.reqData)
 			default:
@@ -28,16 +29,14 @@ class FileHistoryService {
 		}
 	}
 
-	async getAppFileHistotyList(appName: AppItemName): Promise<void> {
+	async getFilesHistoryList(appName: AppItemName): Promise<void> {
 		return ShareStorage.INSTANCE.allSql(
-			`select * from file_history where app_name='${appName}';`
+			`select * from file_history where app_name='${appName}' order by update_time desc limit 100;`
 		)
 	}
 
-
-
 	async addFileHistory(appName: AppItemName, reqData: { filePath: string }): Promise<void> {
-
+		await this.delFileHistory(appName, reqData)
 		return ShareStorage.INSTANCE.execSql(
 			`insert into file_history (app_name, file_path)
 			VALUES ('${appName}', '${reqData.filePath}');`
@@ -46,7 +45,13 @@ class FileHistoryService {
 
 	async delFileHistory(appName: AppItemName, reqData: { filePath: string }): Promise<void> {
 		return ShareStorage.INSTANCE.execSql(
-			`delete from file_history where appName = '${appName} and filePath = '${reqData.filePath}';`
+			`delete from file_history where app_name = '${appName}' and file_path = '${reqData.filePath}';`
+		)
+	}
+
+	async clearFileHistory(appName: AppItemName): Promise<void> {
+		return ShareStorage.INSTANCE.execSql(
+			`delete from file_history where app_name = '${appName}';`
 		)
 	}
 }

@@ -12,6 +12,7 @@
 	let seq = 1;
 	const seqCallback = {}
 	const appChannel = {}
+	let selfAppName = ''
 
 	const registetSeq = (cbfn, runfn) => {
 		seqCallback[seq] = cbfn
@@ -77,6 +78,7 @@
 	/** //@type {Promise<ISandboxConfiguration>} */
 	const resolveConfiguration = (async () => {
 		appClientdir = parseArgv('client-window-config');
+		selfAppName = parseArgv('app-name');
 		return {
 			appRoot: appClientdir
 		}
@@ -283,7 +285,7 @@
 							resolve()
 						}
 					}
-					ipcRenderer.send('proxy-apps-channel-request', appName)
+					ipcRenderer.send('proxy-apps-channel-request', appName, selfAppName)
 				})
 			},
 
@@ -294,7 +296,7 @@
 							(cbData) => { resolve(cbData) },
 							(_seq) => {
 								data.seq = _seq
-								console.log(appChannel)
+								data.fromApp = selfAppName
 								appChannel[appName].port.postMessage(data)
 							})
 
@@ -420,16 +422,14 @@
 		// ... register a handler to receive results ...
 		port.onmessage = (event) => {
 			const channelData = event.data
-			console.log('proxy-apps-channel-event', seqCallback)
-			if (channelData.seq && seqCallback[seq]) {
-				seqCallback[seq](event.data)
-				delete seqCallback[seq]
+			if (channelData.seq && seqCallback[channelData.seq]) {
+				seqCallback[channelData.seq](channelData.data)
+				delete seqCallback[channelData.seq]
 			}
 		}
 	})
 
 	ipcRenderer.on('client:protocal-response', (event, protocal) => {
-		console.log('client:protocal-response', seqCallback)
 		if (protocal && protocal.seq && protocal.data && seqCallback[protocal.seq]) {
 			seqCallback[protocal.seq](protocal.data)
 			delete seqCallback[protocal.seq]

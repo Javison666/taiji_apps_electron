@@ -126,7 +126,7 @@ export class SharedProcess {
 			show: true,
 			webPreferences: {
 				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
-				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`],
+				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--app-name=${AppItemName.Shared_Process}`],
 				nodeIntegration: true,
 				contextIsolation: false,
 				enableWebSQL: false,

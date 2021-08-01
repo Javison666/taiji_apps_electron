@@ -65,18 +65,17 @@ export class ClientApplication {
 			})
 		});
 
-		ipcMain.on('proxy-apps-channel-request', (event, appName: AppItemName) => {
+		ipcMain.on('proxy-apps-channel-request', (event, targetAppName: AppItemName, fromAppName: AppItemName) => {
 			// For security reasons, let's make sure only the frames we expect can
 			// access the worker.
-			const targetWindow = this.windowAppsMap.get(appName)
-
+			const targetWindow = this.windowAppsMap.get(targetAppName)
 			if (targetWindow) {
 				// Create a new channel ...
 				const { port1, port2 } = new MessageChannelMain()
 				// ... send one end to the worker ...
-				targetWindow.webContents.postMessage('provide-apps-channel-event', appName, [port1])
+				targetWindow.webContents.postMessage('provide-apps-channel-event', fromAppName, [port1])
 				// ... and the other end to the main window.
-				event.senderFrame.postMessage('proxy-apps-channel-event', appName, [port2])
+				event.senderFrame.postMessage('proxy-apps-channel-event', targetAppName, [port2])
 				// Now the main window and the worker can communicate with each other
 				// without going through the main process!
 			}

@@ -29,7 +29,7 @@
                         <a
                             href="#"
                             class="font-medium text-purple-600 hover:text-purple-500 cursor-pointer"
-                            @click.prevent="showOpenDialog"
+                            @click.prevent="openNewFile"
                         >
                             打开新的文件
                         </a>
@@ -49,30 +49,35 @@
 </template>
 
 <script lang="ts">
+import { ref, onMounted } from "vue";
 import ListRecentFiles from "@/components/project/ListRecentFiles.vue";
+import { openNewAndAddToFileHistory } from '../../../../bridge/fileHistory'
+
 export default {
-    data: () => ({
-        title: "打开文件历史",
-    }),
     components: {
         ListRecentFiles,
     },
-    methods: {
-        async showOpenDialog() {
-            const res: any = await client.ipcRenderer.showOpenDialog({
-                properties: ["openFile"],
-            });
-            console.log("filePath res", res);
-            if (!res.canceled) {
-                await client.ipcMessagePort.callApp('Shared_Process', {
-                    channelType: 'fileHistory',
-                    channelCommond: 'addFileHistory',
-                    reqData: {
-                        filePath: res.filePaths[0],
-                    },
-                });
-            }
-        },
+    setup() {
+        const openNewFile = async () => {
+            const openFileUri = await openNewAndAddToFileHistory()
+            // const res: any = await client.ipcRenderer.showOpenDialog({
+            //     properties: ["openFile"],
+            // });
+            // if (!res.canceled) {
+            //     await client.ipcMessagePort.callApp("Shared_Process", {
+            //         channelType: "fileHistory",
+            //         channelCommond: "addFileHistory",
+            //         reqData: {
+            //             filePath: res.filePaths[0],
+            //         },
+            //     });
+            // }
+            return openFileUri
+        };
+        return {
+            openNewFile,
+        };
     },
+    methods: {},
 };
 </script>

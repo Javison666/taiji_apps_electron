@@ -18,30 +18,24 @@ class SharedProcessMain {
 	private registerListeners(): void {
 
 		// 提供代理消息通道
-		ipcRenderer.on('provide-apps-channel-event', (event, appName) => {
+		ipcRenderer.on('provide-apps-channel-event', (event, fromAppName) => {
 			const [port] = event.ports
-			console.log('provide-apps-channel-event', appName)
 			port.onmessage = (event) => {
 				const channelData = event.data
 				// const channelData = JSON.parse(event.data)
 				switch (channelData.channelType) {
 					case 'fileHistory':
-						this.handleFileHistoryEvent(appName, port, channelData)
+						this.handleFileHistoryEvent(fromAppName, port, channelData)
 						break;
 					default:
 						break;
 				}
-				// The event data can be any serializable object (and the event could even
-				// carry other MessagePorts with it!)
-				port.postMessage({
-					type: 'share_process'
-				})
 			}
 		})
 	}
 
-	private async handleFileHistoryEvent(appName: AppItemName, port: MessagePort, channelData: any): Promise<void> {
-		const rows = await fileHistoryService.INSTANCE.handleTask(appName, channelData)
+	private async handleFileHistoryEvent(fromAppName: AppItemName, port: MessagePort, channelData: any): Promise<void> {
+		const rows = await fileHistoryService.INSTANCE.handleTask(fromAppName, channelData)
 		port.postMessage({
 			seq: channelData.seq,
 			data: rows,
