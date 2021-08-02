@@ -125,6 +125,7 @@ export class SharedProcess {
 		this.window = new BrowserWindow({
 			show: true,
 			webPreferences: {
+				webSecurity: false,
 				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
 				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--app-name=${AppItemName.Shared_Process}`],
 				nodeIntegration: true,

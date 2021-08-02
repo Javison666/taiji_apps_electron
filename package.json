@@ -6,7 +6,7 @@
   "scripts": {
     "dev:client": "cd build && ttsc -p tsconfig.build.json && cd .. && node --max_old_space_size=4095 ./node_modules/gulp/bin/gulp.js dev-client && electron .",
     "check:src": "cd src && ttsc -p tsconfig.json",
-    "build-client": "cd  electron .",
+    "build:client": "electron-builder",
     "package-client": "cd src && ttsc -p tsconfig.json && cd .. && electron-builder --win --x64",
     "test:client": "electron .",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack.config.js",
@@ -21,7 +21,38 @@
     "dev:client-old": "cd packages/app-client && cross-env NODE_ENV=production webpack --watch"
   },
   "build": {
+    "productName": "taiji",
+    "appId": "com.coder.taiji",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out_client/**/*",
+      "out_page/**/*",
+      "product.json"
+    ],
+    "dmg": {
+      "contents": [
+        {
+          "x": 410,
+          "y": 150,
+          "type": "link",
+          "path": "/Applications"
+        },
+        {
+          "x": 130,
+          "y": 150,
+          "type": "file"
+        }
+      ]
+    },
+    "mac": {
+      "icon": "icon/app.ico"
+    },
     "win": {
+      "icon": "icon/app.ico"
+    },
+    "linux": {
       "icon": "icon/app.ico"
     }
   },
@@ -41,7 +72,7 @@
     "@types/underscore": "^1.11.2",
     "@types/winreg": "^1.2.30",
     "electron": "^12.0.9",
-    "electron-builder": "^22.10.5",
+    "electron-builder": "^22.11.7",
     "gulp": "^4.0.2",
     "gulp-filter": "^7.0.0",
     "gulp-rename": "^2.0.0",

@@ -1,6 +1,8 @@
 export interface IAppConfiguraiton {
-	app_id?: number,
-	app_name: string
+	appId?: number,
+	appName: string,
+	startWidth: number,
+	startHeight: number
 }
 
 export enum AppItemName {

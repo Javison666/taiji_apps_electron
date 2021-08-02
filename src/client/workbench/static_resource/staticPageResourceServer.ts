@@ -34,7 +34,7 @@ class StaticPageResourceServer {
 	}
 
 	public getAppNameServerAddr(appName: string) {
-		return `http://127.0.0.1:${StaticPageResourceServer.INSTANCE.port}/page/apps/${appName}`
+		return `http://127.0.0.1:${StaticPageResourceServer.INSTANCE.port}/page/apps/${appName.toLocaleLowerCase()}`
 	}
 }
 

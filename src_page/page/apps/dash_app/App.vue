@@ -1,7 +1,8 @@
 <template>
-    <router-link to="/">Go to Home</router-link>
-    <router-link to="/about">Go to About</router-link>
-    <router-view></router-view>
+    <div class="absolute w-full h-full">
+        <router-view></router-view>
+    </div>
+
 </template>
 
 <script lang="ts">
@@ -19,6 +20,5 @@ export default defineComponent({
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
     color: #2c3e50;
-    margin-top: 60px;
 }
 </style>

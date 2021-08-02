@@ -16,7 +16,7 @@ export default defineConfig({
     emptyOutDir: true,
     rollupOptions: {
       input: {
-        template: resolve(__dirname, 'page/apps/template/index.html'),
+        template: resolve(__dirname, 'page/apps/dash_app/index.html'),
         sprotect: resolve(__dirname, 'page/apps/sprotect/index.html')
       }
     }

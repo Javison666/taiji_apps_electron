@@ -20,6 +20,7 @@ class SprotectApp {
 			width: 540,
 			height: 400,
 			webPreferences: {
+				webSecurity: false,
 				preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
 				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--app-name=${AppItemName.Sprotect}`],
 				nodeIntegration: true,
@@ -27,7 +28,7 @@ class SprotectApp {
 				nativeWindowOpen: true,
 			}
 		})
-		// 540 400
+		win.menuBarVisible = false
 		win.once('ready-to-show', () => {
 			win.show()
 		})

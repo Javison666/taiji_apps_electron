@@ -1,11 +1,11 @@
-import {createRouter, createWebHashHistory} from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 
 import entryViewFileHistory from '../pages/workbench/entryViewFileHistory.vue'
-import mainDesktop from '../pages/workbench/mainDesktop.vue'
+import mainBench from '../pages/workbench/mainBench.vue'
 
 const routes = [
 	{ path: '/', component: entryViewFileHistory },
-	{ path: '/main', component: mainDesktop },
+	{ path: '/main', component: mainBench },
 ]
 
 const router = createRouter({

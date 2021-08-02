@@ -210,6 +210,7 @@ export const FileAccess = new FileAccessImpl();
 
 export const fileFromClientResource = (filePath: string) => {
 	return path.join(process.cwd(), `./${OutClientDir}/${filePath}`)
+	// return path.join(__dirname, `../../../${OutClientDir}/${filePath}`)
 }
 
 export const fileFromUserDataCommon = async (filePath: string) => {
