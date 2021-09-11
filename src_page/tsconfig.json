@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "lib": ["esnext", "dom"],
+    "baseUrl": "..",
+    "paths": {}
+  },
+  "include": [
+    "../src/client/workbench/protocals/commonProtocal",
+    "../src_page/**/*.ts",
+    "../src_page/**/*.d.ts",
+    "../src_page/**/*.tsx",
+    "../src_page/**/*.vue"
+  ]
+}

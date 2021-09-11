@@ -1,0 +1,21 @@
+{
+	"extends": "./tsconfig.base.json",
+	"compilerOptions": {
+		"removeComments": true,
+		"preserveConstEnums": true,
+		"sourceMap": false,
+		"outDir": "../out_client/client",
+		"target": "es2017",
+		"types": [
+            "node",
+			"winreg",
+			"electron",
+			"express-ws",
+			"express"
+		],
+	},
+	"include": [
+		"./typings",
+		"./client",
+	]
+}

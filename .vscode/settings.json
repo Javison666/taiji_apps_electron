@@ -1,0 +1,37 @@
+{
+	"editor.insertSpaces": false,
+	"files.autoSave": "afterDelay",
+	"files.autoSaveDelay": 1000,
+	"files.trimTrailingWhitespace": true,
+	"files.exclude": {
+		".git": true,
+		".build": true,
+		"**/.DS_Store": true,
+		"build/**/*.js": {
+			"when": "$(basename).ts"
+		},
+	},
+	"typescript.tsdk": "node_modules/typescript/lib",
+	"npm.packageManager": "yarn",
+	"emmet.excludeLanguages": [],
+	"typescript.preferences.importModuleSpecifier": "non-relative",
+	"typescript.preferences.quoteStyle": "single",
+	"git.ignoreLimitWarning": true,
+	"remote.extensionKind": {
+		"msjsdiag.debugger-for-chrome": "workspace"
+	},
+	"gulp.autoDetect": "off",
+	"files.insertFinalNewline": true,
+	"[plaintext]": {
+		"files.insertFinalNewline": false,
+	},
+	"[typescript]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features",
+		"editor.formatOnSave": true,
+	},
+	"[javascript]": {
+		"editor.defaultFormatter": "vscode.typescript-language-features",
+		"editor.formatOnSave": true,
+	},
+	"typescript.tsc.autoDetect": "off",
+}

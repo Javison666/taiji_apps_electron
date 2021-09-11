@@ -1,0 +1,25 @@
+{
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite",
+    "dev:sprotect": "cd ./page/apps/sprotect && vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "serve": "vite preview"
+  },
+  "dependencies": {
+    "vue": "^3.0.5",
+    "vue-router": "4"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss7-compat": "^2.2.4",
+    "@types/node": "^16.3.3",
+    "@vitejs/plugin-vue": "^1.2.5",
+    "@vue/compiler-sfc": "^3.0.5",
+    "autoprefixer": "^9",
+    "postcss": "^7",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
+    "typescript": "^4.3.2",
+    "vite": "^2.4.2",
+    "vue-tsc": "^0.0.24"
+  }
+}
