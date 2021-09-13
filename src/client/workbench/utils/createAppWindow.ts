@@ -16,26 +16,29 @@ interface ICreateAppWindowParam {
 
 export default (param: ICreateAppWindowParam, appConf?: IAppConfiguraiton) => {
 
+	Logger.INSTANCE.info('preload', path.join(__dirname, '../../base/parts/sandbox/electron_browser/preload.js'))
+	let baseWebPreferences = {
+		webSecurity: false,
+		preload: path.join(__dirname, '../../base/parts/sandbox/electron_browser/preload.js'),
+		additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${param.appName}`, `--is-packaged=${Number(app.isPackaged)}`],
+		nodeIntegration: true,
+		contextIsolation: false,
+		nativeWindowOpen: true,
+	}
 	let browserWindowOpt = {
 		show: false,
 		// frame: false,
-		webPreferences: {
-			webSecurity: false,
-			preload: path.join(__dirname, '../../base/parts/sandbox/electron_browser/preload.js'),
-			additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${param.appName}`, `--is-packaged=${Number(app.isPackaged)}`],
-			nodeIntegration: true,
-			contextIsolation: false,
-			nativeWindowOpen: true,
-		},
+		webPreferences: baseWebPreferences
 	}
 
 	if (param.browserOpt) {
 		browserWindowOpt = {
 			...browserWindowOpt,
-			...param.browserOpt
+			...param.browserOpt,
+			webPreferences: baseWebPreferences,
 		}
-		Logger.INSTANCE.info('browserWindowOpt', browserWindowOpt)
 	}
+	Logger.INSTANCE.info('browserWindowOpt', browserWindowOpt)
 
 	const win = new BrowserWindow(browserWindowOpt)
 	ClientApplication.INSTANCE.windowAppsMap.set(param.appName, win)
