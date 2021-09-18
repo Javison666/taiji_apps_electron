@@ -1,12 +1,15 @@
 'use strict';
 
 import * as path from 'path';
-
+import * as fs from 'fs'
+const bytenode = require('bytenode')
 const gulp = require('gulp');
 const task = require('./lib/task');
 const util = require('./lib/util');
 const exec = require('child_process').exec;
 // const uglify = require('gulp-uglify');
+
+const outSrcDir = 'out_client'
 
 function execFn(execStr: string): () => Promise<void> {
     const result = () => new Promise<void>((c, e) => {
@@ -25,7 +28,7 @@ function copyJs(): () => Promise<void> {
     return () => new Promise<void>(resolve => {
         gulp.src(['./src/**/*.js'])
             // .pipe(uglify())
-            .pipe(gulp.dest('./out_client'))
+            .pipe(gulp.dest('./' + outSrcDir))
         resolve()
     })
 }
@@ -33,13 +36,38 @@ function copyJs(): () => Promise<void> {
 function copyHtml(): () => Promise<void> {
     return () => new Promise<void>(resolve => {
         gulp.src(['./src/**/*.html'])
-            .pipe(gulp.dest('./out_client'))
+            .pipe(gulp.dest('./' + outSrcDir))
         resolve()
     })
 }
 
+
+const bytenodeFiles = [
+    `${outSrcDir}/client/entry/electron_main/main.js`,
+    `${outSrcDir}/client/entry/electron_main/app.js`,
+]
+
+function handleBytenodeFiles() {
+    const result = () => new Promise<void>(async (c, e) => {
+        try {
+            for (let filePath of bytenodeFiles) {
+                await bytenode.compileFile({
+                    filename: filePath,
+                    electron: true
+                })
+                await fs.unlinkSync(path.join(__dirname, '../' + filePath))
+            }
+            c()
+        } catch (err) {
+            e(err)
+        }
+    })
+    result.taskName = `bytenode`;
+    return result
+}
+
 const buildClientTask = task.define('build-client', task.series(
-    util.rimraf(path.join(__dirname, '../out_client')),
+    util.rimraf(path.join(__dirname, '../' + outSrcDir)),
     execFn(`cd ${path.join(process.cwd(), 'src')} && ttsc -p tsconfig.json`),
     execFn(`cd ..`),
     copyJs(),
@@ -49,11 +77,13 @@ const buildClientTask = task.define('build-client', task.series(
 gulp.task(buildClientTask);
 
 const devClientTask = task.define('dev-client', task.series(
-    util.rimraf(path.join(__dirname, '../out_client')),
+    util.rimraf(path.join(__dirname, '../' + outSrcDir)),
     execFn(`cd ${path.join(process.cwd(), 'src')} && ttsc -p tsconfig.json`),
     execFn(`cd ..`),
     copyJs(),
-    copyHtml()
+    // execFn(`bytenode out_client/client/*.js`),
+    copyHtml(),
+    handleBytenodeFiles()
 ))
 
 gulp.task(devClientTask);
