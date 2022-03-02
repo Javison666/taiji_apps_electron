@@ -1,16 +1,17 @@
 import Logger from "src/client/platform/environment/node/logger"
 import { addBLogger } from 'src_page/page/apps/test_qn/use/useClientManage'
+import { IBuyerItem } from './test_module'
 
 interface IClientCefClients {
     uri: string,
-    client: any
+    client: ClientCef
 }
 
 let client_id = 2000000
 
 class ClientCef {
 
-    private static clients: IClientCefClients[] = []
+    public static clients: IClientCefClients[] = []
 
     private _ws: any = null
     private _qn_appkey = ''
@@ -19,6 +20,14 @@ class ClientCef {
     private _qn_ws_sessionId = 0
     private _req_id = 1
     private _client_id = 0
+
+    static getCef() {
+        if(ClientCef.clients.length>0){
+            return ClientCef.clients[0].client
+        }else{
+            return null
+        }
+    }
 
     static get clientSize() {
         return ClientCef.clients.length
@@ -39,12 +48,12 @@ class ClientCef {
         this._ws.onopen = () => {
             this.sendws({}, 0)
         }
-        this._ws.onmessage = (msg: string) => {
+        this._ws.onmessage = (msg: any) => {
             addBLogger({
                 type: 'recv',
                 clientId: this._client_id,
                 time: Date.now(),
-                message: msg
+                message: msg.data
             })
         }
         ClientCef.clients.push({
@@ -69,8 +78,8 @@ class ClientCef {
         this._qn_ws_sessionId = parseInt(String(Math.random() * 10000000))
     }
 
-    static sendAllWs(data: any, req_action: number){
-        for(let cef of ClientCef.clients){
+    static sendAllWs(data: any, req_action: number) {
+        for (let cef of ClientCef.clients) {
             cef.client.sendws(data, req_action)
         }
     }
@@ -106,15 +115,17 @@ class ClientCef {
             if (data.type && data.data) {
                 data.data.biz__type = data.type
             }
+            if (req_action === 0) {
+                this._req_id = 1
+                // sendData.req_id = this._req_id
+            }
             let sendData = {
-                req_id: 0,
+                req_id: this._req_id,
                 req_action,
                 req_ver: 1,
                 data
             }
-            if (req_action === 0) {
-                sendData.req_id = this._req_id
-            }
+            
             let sendText = JSON.stringify(sendData)
             Logger.INSTANCE.info('cef_page to inside', this._client_id, sendText)
             this._ws.send(sendText)
@@ -128,12 +139,32 @@ class ClientCef {
         }
     }
 
-    sendMockBuyerMessage(fromNick: string, text: string){
+    sendMockBuyerAddMessage(buyerItem: IBuyerItem) {
         this.sendws({
             data: {
-                result:[{
+                "code": 0,
+                "subcode": 0,
+                "result": {
+                    "targetType": "3",
+                    "nick": buyerItem.nick,
+                    "targetId": buyerItem.targetId,
+                    "ccode": buyerItem.ccode,
+                    "ctype": 0,
+                    "bizeType": "11001",
+                    "display": buyerItem.nick,
+                    "portrait": "pic:impicture",
+                    "unreadcount": 0
+                }
+            }
+        }, 50)
+    }
+
+    sendMockBuyerMessage(buyerItem: IBuyerItem, text: string) {
+        this.sendws({
+            data: {
+                result: [{
                     "fromid": {
-                        "nick": fromNick
+                        "nick": buyerItem.nick
                     },
                     "toid": {
                         "nick": this._qn_nick
@@ -147,12 +178,12 @@ class ClientCef {
                         }]
                     },
                     "mcode": {
-                        "clientId": "6841915058562269466" + this._req_id,
-                        "messageId": "959653690691.PNM"
+                        "clientId": `684${Date.now()}${this._req_id}.PTC`,
+                        "messageId": `959653690691${this._req_id}.PTM`
                     },
-                    "sendTime": "1631239666476",
+                    "sendTime": String(Date.now()),
                     "cid": {
-                        "ccode": "2153277040.1-778955163.1#11001@cntaobao"
+                        "ccode": buyerItem.ccode
                     }
                 }]
             }

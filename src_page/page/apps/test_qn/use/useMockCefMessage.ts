@@ -2,6 +2,10 @@ import ClientCef from 'src_page/page/apps/test_qn/services/clientCef'
 
 export default () => {
 
+    const startTest = () => {
+        
+    }
+
     const useMockBuyerMessage = () => {
         ClientCef.sendAllWs({
             data: {

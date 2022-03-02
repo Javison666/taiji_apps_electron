@@ -18,6 +18,7 @@ export const runApp = async (appConfiguaration: IAppConfiguraiton) => {
 			}
 			break
 		case IAppType.Client_Web:
+			
 			break
 		default:
 			break;

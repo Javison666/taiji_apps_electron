@@ -208,10 +208,12 @@ class FileAccessImpl {
 
 export const FileAccess = new FileAccessImpl();
 
+// 适配编译前后返回当前是否为打包环境, 适配main以及render线程
 export const isPackagedCommon = () => {
 	return (app && app.isPackaged) || (!app && client && client.app && client.app.isPackaged)
 }
 
+// 适配编译前后返回out_page目录下的内容, 适配main以及render线程
 export const fileFromPageResource = (filePath: string) => {
 	if (isPackagedCommon()) {
 		return path.join(`./out_page/${filePath}`)
@@ -220,16 +222,16 @@ export const fileFromPageResource = (filePath: string) => {
 	}
 }
 
+// 适配编译前后环境返回src文件夹的目录, 适配main以及render线程
 export const fileFromClientResource = (filePath: string) => {
 	if (isPackagedCommon()) {
 		return path.join(`./${OutClientDir}/${filePath}`)
 	} else {
 		return path.join(process.cwd(), path.join(`./${OutClientDir}/${filePath}`))
 	}
-	// return path.join(process.cwd(), path.join(`./${OutClientDir}/${filePath}`))
-	// return path.join(`./${OutClientDir}/${filePath}`)
 }
 
+// 适配编译前后环境返回public的目录, 适配main以及render线程
 export const fileFromPublicResource = (filePath: string) => {
 	if (isPackagedCommon()) {
 		return path.join(process.cwd(), 'resources', filePath)
@@ -238,10 +240,7 @@ export const fileFromPublicResource = (filePath: string) => {
 	}
 }
 
-// export const staticFileFromMainProcess = (filePath: string) => {
-// 	return path.join(`./${OutClientDir}/${filePath}`)
-// }
-
+// 返回userData目录, 适配main以及render线程
 export const fileFromUserDataCommon = (filePath: string) => {
 	if (app) {
 		return path.join(app.getPath('userData'), filePath)
@@ -263,3 +262,12 @@ export const fileCreateIfNotExisted = (filePath: string) => {
 }
 
 export const getAppDataDirPath = () => ipcRenderer.invoke('client:getAppDataDirPath')
+
+export const getVersionCommon = async () => {
+	if (app) {
+		return app.getVersion()
+	} else {
+		let version = await ipcRenderer.invoke('client:getClientVersion')
+		return version
+	}
+}

@@ -2,10 +2,13 @@ node_modules
 out_page
 out_client
 .DS_Store
+public/pdd
 dist
+dist_pre
 user_data
-log
 logs
 yarn-error.log
 versions
 cache
+data
+.vscode

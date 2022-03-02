@@ -11,7 +11,7 @@ import path = require('path');
 import Logger from 'client/platform/environment/node/logger'
 
 import { hanleWindowRenderProtect } from 'client/workbench/utils/windowEnv'
-
+import { env } from 'client/env';
 
 // import { connect as connectMessagePort } from 'vs/base/parts/ipc/electron-main/ipc.mp';
 // import { assertIsDefined } from 'vs/base/common/types';
@@ -50,7 +50,6 @@ export class SharedProcess {
 		// send the port back to the requesting window
 		// e.sender.postMessage('vscode:createSharedProcessMessageChannelResult', nonce, [port]);
 	}
-
 
 	// private onWillShutdown(): void {
 	// 	const window = this.window;
@@ -135,7 +134,7 @@ export class SharedProcess {
 				allowRunningInsecureContent: true,
 				preload: path.join(__dirname, '../../../base/parts/sandbox/electron_browser/preload.js'),
 				// preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
-				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${AppItemName.Shared_Process}`, `--is-packaged=${Number(app.isPackaged)}`],
+				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${AppItemName.Shared_Process}`, `--is-packaged=${Number(app.isPackaged)}`, `--env-${env}`],
 				nodeIntegration: true,
 				contextIsolation: false,
 				enableWebSQL: false,
@@ -152,9 +151,7 @@ export class SharedProcess {
 			this.window.webContents.openDevTools();
 		}
 
-		this.window.webContents.on('unresponsive', () => {
-			Logger.INSTANCE.error('share-process unresponsive.')
-		})
+
 
 		this.window.once('close', () => {
 			Logger.INSTANCE.info('share-process close.')
@@ -164,11 +161,24 @@ export class SharedProcess {
 			Logger.INSTANCE.info('share-process did-finish-load.')
 		})
 
-		this.window.webContents.on('did-fail-load', () => {
-			Logger.INSTANCE.info('share-process did-fail-load.')
+		// Crashes & Unresponsive & Failed to load
+		this.window.webContents.on('did-fail-load', (event, errorCode, errorDescription) => {
+			Logger.INSTANCE.info('share-process did-fail-load:', errorDescription)
 			setTimeout(() => {
 				this.window?.webContents.reload()
 			}, 1000)
+		})
+
+		this.window.on('unresponsive', () => {
+			Logger.INSTANCE.info('share-process win unresponsive.')
+		})
+
+		this.window.webContents.on('render-process-gone', (event, details) => {
+			Logger.INSTANCE.error('share-process render-process-gone:', details.exitCode, details.reason)
+		})
+
+		this.window.webContents.on('unresponsive', () => {
+			Logger.INSTANCE.error('share-process unresponsive.')
 		})
 
 		ClientApplication.INSTANCE.windowAppsMap.set(AppItemName.Shared_Process, this.window)
@@ -176,9 +186,6 @@ export class SharedProcess {
 		this.window.loadFile(shareHtmlPath)
 
 		hanleWindowRenderProtect(this.window, AppItemName.Shared_Process, () => {
-			// if (win) {
-			// 	win.webContents.reload()
-			// }
 		})
 
 	}

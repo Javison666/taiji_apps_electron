@@ -4,7 +4,3 @@ export interface IAppConfiguraiton {
 	startWidth: number,
 	startHeight: number
 }
-
-export enum AppItemName {
-	Shared_Process = 'Shared_Process',
-}

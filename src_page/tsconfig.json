@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "module": "esnext",
+    "module": "commonjs",
     "moduleResolution": "node",
     "strict": true,
     "jsx": "preserve",
@@ -10,7 +10,10 @@
     "esModuleInterop": true,
     "lib": ["esnext", "dom"],
     "baseUrl": "..",
-    "paths": {}
+    "paths": {},
+    "types": [
+      "electron"
+    ]
   },
   "include": [
     "../src/client/workbench/protocals/commonProtocal",

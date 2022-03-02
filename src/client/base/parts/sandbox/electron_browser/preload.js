@@ -15,6 +15,7 @@
 	let selfAppName = ''
 	let isPackaged = null
 	let userDataPath = ''
+	let uuid = ''
 	let handlePortMessage = (appName, channelData) => null
 
 	const registetSeq = (cbfn, runfn) => {
@@ -33,7 +34,7 @@
 	 * @returns {true | never}
 	 */
 	function validateIPC(channel) {
-		if (!channel || !channel.startsWith('client:')) {
+		if (!channel || !(channel.startsWith('client:') || channel.startsWith('render:'))) {
 			throw new Error(`Unsupported event IPC channel '${channel}'`);
 		}
 
@@ -84,6 +85,7 @@
 		selfAppName = parseArgv('app-name');
 		isPackaged = Boolean(Number(parseArgv('is-packaged')))
 		userDataPath = parseArgv('user-data-path')
+		uuid = parseArgv('uuid')
 		return {
 			appRoot: appClientdir
 		}
@@ -157,6 +159,10 @@
 	 */
 	const globals = {
 
+		bridge: {
+			call: () => { }
+		},
+
 		/**
 		 * A minimal set of methods exposed from Electron's `ipcRenderer`
 		 * to support communication to main process.
@@ -168,6 +174,7 @@
 		 */
 		app: {
 			appName: selfAppName,
+			getUuid: () => uuid,
 			userDataPath,
 			userDataAppPath: userDataPath + '/' + selfAppName,
 			isPackaged,
@@ -177,6 +184,17 @@
 						(data) => { resolve(data) },
 						(_seq) => {
 							ipcRenderer.send('client:hideWindow', selfAppName);
+						}
+					)
+				})
+			},
+			destroyWindow: (appName) => {
+				return new Promise(resolve => {
+					registetSeq(
+						(data) => { resolve(data) },
+						(_seq) => {
+							// appName不存在时关闭自身窗口
+							ipcRenderer.send('client:destroyWindow', appName);
 						}
 					)
 				})
@@ -257,6 +275,15 @@
 
 					return this;
 				}
+			},
+
+			showErrorBox(title, content) {
+				ipcRenderer.send('client:showErrorBox', title, content);
+			},
+
+			showMessageBox(option) {
+				ipcRenderer.send('client:showMessageBox', option);
+
 			},
 
 			showOpenDialog(options) {

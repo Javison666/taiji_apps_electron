@@ -2,9 +2,8 @@ import { app } from 'electron';
 import { IAppConfiguraiton, AppItemName, IAppType } from 'client/workbench/protocals/commonProtocal'
 // import { runApp } from 'client/workbench/apps/index'
 import Logger from 'client/platform/environment/node/logger'
-import StaticPageResourceServer from 'client/workbench/static_resource/staticPageResourceServer'
-import AppsService from 'client/workbench/services/appsService'
-import createAppWindow from 'client/workbench/utils/createAppWindow'
+import ClientApplication from 'client/entry/electron_main/app';
+import runApp from 'client/workbench/apps';
 
 class DashBench {
 
@@ -13,17 +12,12 @@ class DashBench {
 	private static appList: IAppConfiguraiton[] = []
 
 	private appConf: IAppConfiguraiton = {
-		appName: AppItemName.Dash_App,
+		appName: AppItemName.Sys_Dash_App,
 		querys: '',
-		appType: IAppType.Client_Web,
+		appType: IAppType.Share_Web,
 		browserOpt: {
 			width: 800,
 			height: 600,
-			webPreferences: {
-				maximizable: false,
-				minimizable: false,
-				fullscreenable: false,
-			}
 		}
 	}
 
@@ -44,7 +38,7 @@ class DashBench {
 	}
 
 	public async udtAppList(): Promise<void> {
-		DashBench.appList = AppsService.INSTANCE.appsConfigurationList
+		DashBench.appList = ClientApplication.INSTANCE.appList
 	}
 
 	public enterDashUI(): void {
@@ -54,18 +48,13 @@ class DashBench {
 			// 未授权
 			return
 		}
-		// if (appLength === 1) {
-		// 	// 直接进入
-		// 	runApp(DashBench.appList[0])
-		// 	return
-		// }
+		if (appLength === 1) {
+			// 直接进入
+			runApp(DashBench.appList[0])
+			return
+		}
 		// 创建dash ui
-		let uri = StaticPageResourceServer.INSTANCE.getAppNameServerAddr(this.appConf)
-		createAppWindow({
-			appName: AppItemName.Dash_App,
-			loadURI: uri,
-			readyShow: true
-		})
+		runApp(DashBench.INSTANCE.appConf)
 
 	}
 }

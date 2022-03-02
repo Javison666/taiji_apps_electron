@@ -1,0 +1,10 @@
+{
+	"productName": "client-prebuild",
+	"appId": "com.code.client-prebuild",
+	"directories": {
+		"output": "dist_pre"
+	},
+	"files": [
+		"build_pre/main.js"
+	]
+}

@@ -1,8 +1,9 @@
 import { ipcRenderer } from 'electron';
 import StaticPageResourceServer from 'client/workbench/static_resource/staticPageResourceServer'
-import AppsService from 'client/workbench/services/appsService'
 import UtilService from 'client/workbench/services/utilService'
 import FileHistoryService from 'client/workbench/services/fileHistoryService'
+import itemStorageService from 'client/workbench/services/itemStorageService'
+import VersionUdtService from 'client/workbench/services/versionUdtService'
 import { AppItemName } from 'client/workbench/protocals/commonProtocal'
 import ShareStorage from 'client/base/parts/storage/node/shareStorage'
 import Logger from 'client/platform/environment/node/logger'
@@ -21,9 +22,11 @@ class SharedProcessMain {
 		await StaticPageResourceServer.INSTANCE.main()
 		await ShareStorage.INSTANCE.main()
 		// 该服务暂时在share与主线程同时运行
-		await AppsService.INSTANCE.main()
 		await UtilService.INSTANCE.main()
 		await FileHistoryService.INSTANCE.main()
+		await itemStorageService.INSTANCE.main()
+
+		VersionUdtService.INSTANCE.startLoopCheckUdt()
 		this.processHeart()
 	}
 

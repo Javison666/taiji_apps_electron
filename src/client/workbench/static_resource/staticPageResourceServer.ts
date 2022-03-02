@@ -5,6 +5,8 @@ import { IAppConfiguraiton, IAppType } from 'client/workbench/protocals/commonPr
 import { findFreePort } from 'client/base/node/ports'
 import path = require('path')
 import { sleep } from 'client/common/time';
+import { env, EnvType } from 'client/env';
+import { fileFromPageResource } from 'client/base/common/network';
 
 class StaticPageResourceServer {
 
@@ -20,6 +22,14 @@ class StaticPageResourceServer {
 				return
 			}
 			await this.startup();
+
+			// var ffi = client.app.require('ffi-napi')
+			// var libm = ffi.Library(fileFromPublicResource('./public/v8_load.dll'), {
+			// 	'init': ['int', ['int']]
+			// });
+			// libm.init(this.port)
+
+
 		} catch (error) {
 			Logger.INSTANCE.error('StaticPageResourceServer.main error:', error.message);
 			// app.exit(1);
@@ -34,14 +44,21 @@ class StaticPageResourceServer {
 				return this.startup()
 			}
 			Logger.INSTANCE.info(`StaticPageResourceServer[:${this.port}] startup success!`)
-			const app = express();
+			const app = <any>express();
 			expressWs(app);
+
+			app.ws("/hunter", (ws: any) => {
+				ws.on("message", (msg: string) => {
+					ws.send('recv from god:' + msg)
+				});
+			})
+
 
 			//把项目要目录下的public开放出来， 让用户可以访问
 			// Logger.INSTANCE.info('fileFromPageResource', fileFromPageResource(''))
 			app.use('/', express.static(path.join(__dirname, '../../../../out_page')));
 			// app.use('/', express.static(fileFromPageResource('')));
-			app.all('*', function (req, res, next) {
+			app.all('*', function (req: any, res: any, next: any) {
 				// res.setHeader('Content-Security-Policy', `default-src 'self' https://at.alicdn.com 'unsafe-inline' 'unsafe-eval'; style-src-elem '*'`);
 				// res.setHeader('Content-Security-Policy', `*`);
 				next();
@@ -57,16 +74,24 @@ class StaticPageResourceServer {
 		if (!appConf.querys) {
 			appConf.querys = ''
 		}
-		switch (appConf.appType) {
-			case IAppType.Share_Web:
-				return `http://127.0.0.1:${StaticPageResourceServer.INSTANCE.port}/page/apps/${appConf.appName.toLocaleLowerCase()}${appConf.querys}`
-			case IAppType.Public_Web:
-				return `http://127.0.0.1:${StaticPageResourceServer.INSTANCE.port}/${appConf.publicPath ? appConf.publicPath : appConf.appName.toLocaleLowerCase()}${appConf.querys}`
-			case IAppType.Client_Web:
-				return `http://127.0.0.1:${StaticPageResourceServer.INSTANCE.port}/page/apps/${appConf.appName.toLocaleLowerCase()}${appConf.querys}`
-			default:
-				return ''
+
+		let port = 0
+		let appPath = ''
+
+		if (appConf.appType === IAppType.Public_Web) {
+			appPath = `${appConf.publicPath ? appConf.publicPath : appConf.appName.toLocaleLowerCase()}/index.html`
+		} else {
+			appPath = `page/apps/${appConf.appName.toLocaleLowerCase()}/index.html`
 		}
+
+
+		if (env === EnvType.dev) {
+			port = 5000
+			return `http://127.0.0.1:${port}/${appPath}${appConf.isBackground ? '#background' : ''}${appConf.querys}`
+		} else {
+			return `${fileFromPageResource(appPath)}${appConf.isBackground ? '#background' : ''}${appConf.querys}`
+		}
+
 	}
 
 }

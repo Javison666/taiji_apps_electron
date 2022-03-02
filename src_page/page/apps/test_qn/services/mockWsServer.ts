@@ -1,5 +1,7 @@
+import Logger from 'src/client/platform/environment/node/logger'
 import clientInside from './clientInside'
 import clientTest from './clientTest'
+import TestModule from './test_module'
 
 class MockWsServer {
     public static readonly INSTANCE = new MockWsServer()
@@ -21,6 +23,7 @@ class MockWsServer {
     }
 
     async startUp(): Promise<void> {
+        await TestModule.INSTANCE.initModule()
         let express = client.app.require('express')
         let expressWs = client.app.require('express-ws')
         this._app = express();
@@ -57,6 +60,7 @@ class MockWsServer {
         });
         // app.use('/', express.static(fileFromPageResource('')));
         this._app.all('*', function (req: any, res: any, next: any) {
+            console.log('all', req, res)
             // res.setHeader('Content-Security-Policy', `default-src 'self' https://at.alicdn.com 'unsafe-inline' 'unsafe-eval'; style-src-elem '*'`);
             // res.setHeader('Content-Security-Policy', `*`);
             next();

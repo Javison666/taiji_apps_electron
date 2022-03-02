@@ -4,6 +4,8 @@ import { fileFromClientResource, fileFromUserDataCommon } from 'client/base/comm
 import { AppItemName, IAppConfiguraiton, IAppType } from 'client/workbench/protocals/commonProtocal'
 import Logger from 'client/platform/environment/node/logger'
 import { hanleWindowRenderProtect } from 'client/workbench/utils/windowEnv'
+import { env, EnvType } from 'client/env'
+import Background from 'client/entry/electron_main/background'
 
 const { BrowserWindow, app } = require('electron')
 
@@ -11,16 +13,14 @@ interface ICreateAppWindowParam {
 	appName: AppItemName,
 	loadURI: string,
 	readyShow?: boolean,
-	browserOpt?: any
+	browserOpt?: Electron.BrowserWindowConstructorOptions
 }
 
 export default (param: ICreateAppWindowParam, appConf?: IAppConfiguraiton) => {
-
-	Logger.INSTANCE.info('preload', path.join(__dirname, '../../base/parts/sandbox/electron_browser/preload.js'))
 	let baseWebPreferences = {
 		webSecurity: false,
 		preload: path.join(__dirname, '../../base/parts/sandbox/electron_browser/preload.js'),
-		additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${param.appName}`, `--is-packaged=${Number(app.isPackaged)}`],
+		additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${param.appName}`, `--is-packaged=${Number(app.isPackaged)}`, `--env-${env}`],
 		nodeIntegration: true,
 		contextIsolation: false,
 		nativeWindowOpen: true,
@@ -38,12 +38,21 @@ export default (param: ICreateAppWindowParam, appConf?: IAppConfiguraiton) => {
 			webPreferences: baseWebPreferences,
 		}
 	}
-	Logger.INSTANCE.info('browserWindowOpt', browserWindowOpt)
+	// Logger.INSTANCE.info('browserWindowOpt', browserWindowOpt)
 
 	const win = new BrowserWindow(browserWindowOpt)
-	ClientApplication.INSTANCE.windowAppsMap.set(param.appName, win)
+
+
+	if (appConf && appConf.isBackground) {
+		// 后台应用独立管理, 防止被一起关闭
+		Background.INSTANCE.windowAppsMap.set(param.appName, win)
+	} else {
+		ClientApplication.INSTANCE.windowAppsMap.set(param.appName, win)
+	}
+
+
 	win.menuBarVisible = false
-	if (process.argv.find(i => i.includes('debug')) || !app.isPackaged) {
+	if (env === EnvType.dev || process.argv.find(i => i.includes('debug')) || !app.isPackaged) {
 		win.webContents.openDevTools();
 	}
 
@@ -64,10 +73,14 @@ export default (param: ICreateAppWindowParam, appConf?: IAppConfiguraiton) => {
 		Logger.INSTANCE.info(param.appName, 'did-fail-load.', errorCode, errorDescription);
 	});
 
-
 	if (param.readyShow) {
 		win.once('ready-to-show', () => {
-			win.show()
+			if (appConf && appConf.isBackground) {
+
+			} else {
+				win.show()
+			}
+
 		})
 	}
 

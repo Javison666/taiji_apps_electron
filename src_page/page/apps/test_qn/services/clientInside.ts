@@ -56,18 +56,40 @@ class ClientInside {
     }
 
     handleMessage(msg: string) {
-        let data
-        try{
-            data = JSON.parse(msg)
-        }catch(err){
-            Logger.INSTANCE.info(this._clientId, 'recv from inside:', err)
+        // let data
+        // try{
+        //     data = JSON.parse(msg)
+        // }catch(err){
+        //     Logger.INSTANCE.info(this._clientId, 'recv from inside err:', err)
+        // }
+        if (!msg) {
+            return
         }
-        if (data && data.id && data.method === 'Runtime.evaluate' && data.params && data.params.expression) {
-            // let uri = 'wss://127.0.0.1:30120?appkey=&qnVersion=&nick='
-            if (data.params.expression.includes('window._qn_ws_addr')) {
-                let uri = data.params.expression.match(/'([^']+)'/)[1]
+        if (ClientCef.clientSize > 0) {
+            addALogger({
+                type: 'recv',
+                clientId: this._clientId,
+                time: Date.now(),
+                message: msg.substr(0, 80)
+            })
+            return
+        }
+        if (msg.includes("_qn_ws_addr=''")) {
+            addALogger({
+                type: 'recv',
+                clientId: this._clientId,
+                time: Date.now(),
+                logType: 'error',
+                message: 'index.js => 注入inside的ws地址为空'
+            })
+            return
+        }
+        if (msg.includes('window._qn_ws_addr')) {
+            let reg = msg.match(/'([^']+)'/)
+            if (reg) {
+                let uri = reg[1] + '&t=6'
                 new ClientCef(uri)
-                this.send({ "id": data.id, "result": { "result": { "type": "boolean", "value": true } } })
+                this.send({ "id": 1, "result": { "result": { "type": "boolean", "value": true } } })
                 Logger.INSTANCE.info(this._clientId, 'recv from inside:', 'index.js', uri)
                 addALogger({
                     type: 'recv',
@@ -77,7 +99,36 @@ class ClientInside {
                 })
                 return
             }
+
+            return
         }
+        // if (data && data.method === 'Runtime.evaluate' && data.params && data.params.expression) {
+        //     // let uri = 'wss://127.0.0.1:30120?appkey=&qnVersion=&nick='
+        //     if(data.params.expression.includes("_qn_ws_addr=''")){
+        //         addALogger({
+        //             type: 'recv',
+        //             clientId: this._clientId,
+        //             time: Date.now(),
+        //             logType: 'error',
+        //             message: 'index.js => 注入inside的ws地址为空'
+        //         })
+        //         return
+        //     }
+        //     if (data.params.expression.includes('window._qn_ws_addr')) {
+        //         let uri = data.params.expression.match(/'([^']+)'/)[1]
+        //         console.log('uri', uri)
+        //         new ClientCef(uri)
+        //         this.send({ "id": data.id, "result": { "result": { "type": "boolean", "value": true } } })
+        //         Logger.INSTANCE.info(this._clientId, 'recv from inside:', 'index.js', uri)
+        //         addALogger({
+        //             type: 'recv',
+        //             clientId: this._clientId,
+        //             time: Date.now(),
+        //             message: 'index.js => ' + uri
+        //         })
+        //         return
+        //     }
+        // }
 
         Logger.INSTANCE.info(this._clientId, 'recv from inside:', msg)
         addALogger({

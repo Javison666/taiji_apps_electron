@@ -1,4 +1,5 @@
 // export { };
+require('bytenode')
 const path = require('path');
 // const bootstrap = require('./bootstrap');
 const product = require('../product.json');

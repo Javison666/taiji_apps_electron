@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { outDir, appNames } from './build/env'
 const { resolve } = require('path')
+
+let rollupOptions: { input: { [key: string]: string } } = {
+  input: {}
+}
+appNames.forEach(appName => {
+  rollupOptions.input[appName] = resolve(__dirname, `page/apps/${appName}/index.html`)
+})
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  server: {
+    port: 5000
+  },
   resolve: {
     alias: {
       // 'vue': 'vue/dist/vue.esm-bundler.js',
@@ -13,13 +24,8 @@ export default defineConfig({
   },
   plugins: [vue()],
   build: {
-    outDir: '../out_page',
+    outDir,
     emptyOutDir: true,
-    rollupOptions: {
-      input: {
-        dash_app: resolve(__dirname, 'page/apps/dash_app/index.html'),
-        test_qn: resolve(__dirname, 'page/apps/test_qn/index.html')
-      }
-    }
+    rollupOptions
   }
 })

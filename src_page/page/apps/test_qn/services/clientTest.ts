@@ -22,12 +22,12 @@ class clientTest {
         clientTest.clients.add(this)
 
         this._ws.on("message", (msg: string) => {
-            Logger.INSTANCE.info('client test recv:', msg)
+            // Logger.INSTANCE.info('client test recv:', msg)
             this.handleMessage(msg)
         });
 
         this._ws.on("close", () => {
-            Logger.INSTANCE.info('client test closed')
+            // Logger.INSTANCE.info('client test closed')
             clientTest.clients.delete(this)
         })
     }

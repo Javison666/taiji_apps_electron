@@ -1,14 +1,20 @@
-import { ipcMain, MessageChannelMain, BrowserWindow, app, dialog, Menu, Tray, globalShortcut, session } from 'electron'
-import { onUnexpectedError } from 'client/base/common/errors'
+import { BrowserWindow, app, Menu, Tray } from 'electron'
+// import { onUnexpectedError } from 'client/base/common/errors'
 import Logger from 'client/platform/environment/node/logger'
-import { AppItemName, IAppConfiguraiton } from 'client/workbench/protocals/commonProtocal'
-import { runApp } from 'client/workbench/apps/index'
+import { AppItemName, IAppConfiguraiton, IAppType } from 'client/workbench/protocals/commonProtocal'
 import { SharedProcess } from 'client/platform/sharedProcess/electron-main/sharedProcess'
 import LoginBench from 'client/workbench/main/loginBench/electron-main/index'
-import { fileFromPublicResource } from 'client/base/common/network'
-import path = require('path')
-import BackServiceMain from 'client/workbench/apps/backService/electron-main/index'
+import { fileFromPublicResource, getVersionCommon } from 'client/base/common/network'
 import DashBench from 'client/workbench/main/dashBench/electron-main'
+import registerCommonEvent from 'client/entry/electron_main/registerEventHandle/registerCommonEvent'
+import registerCustomerEvent from 'client/entry/electron_main/registerEventHandle/registerCustomerEvent'
+
+import VersionUdtService, { isCurrentVersionPkg } from 'client/workbench/services/versionUdtService'
+import * as ini from 'ini'
+import child_process = require('child_process');
+import path = require('path')
+import fs = require('fs')
+import { AppPackageName } from 'client/env'
 
 /**
  * The main client application. There will only ever be one instance,
@@ -20,11 +26,63 @@ export class ClientApplication {
 	public windowAppsMap: Map<AppItemName, BrowserWindow> = new Map()
 	public tray: Tray | null = null;
 
-	private downloadCb: { [propertyNames: string]: (...params: any) => void } = {}
-
 	public clientData = {
-		staticServerPort: 0
+		staticServerPort: 0,
 	};
+
+	private _isRelaunching = false
+
+	// public appList: IAppConfiguraiton[] = [{
+	// 	appName: AppItemName.Hunter_App,
+	// 	appNick: 'Hunter',
+	// 	querys: '',
+	// 	appType: IAppType.Share_Web,
+	// 	browserOpt: {
+	// 		width: 800,
+	// 		height: 600
+	// 	}
+	// }]
+
+	public appList: IAppConfiguraiton[] = [{
+		appName: AppItemName.Notify_App,
+		appNick: '通知渠道',
+		querys: '',
+		appType: IAppType.Share_Web,
+		browserOpt: {
+			width: 800,
+			height: 600
+		}
+	}, {
+		appName: AppItemName.Scan_Udt_App,
+		appNick: '扫描变动',
+		querys: '',
+		appType: IAppType.Share_Web,
+		browserOpt: {
+			width: 800,
+			height: 600
+		}
+	}, {
+		appName: AppItemName.Douyin_App,
+		appNick: '抖音App',
+		querys: '',
+		appType: IAppType.Share_Web,
+		browserOpt: {
+			width: 300,
+			height: 200
+		}
+	}, {
+		appName: AppItemName.Sys_Udt_App,
+		appNick: '软件更新',
+		querys: '',
+		appType: IAppType.Share_Web,
+		isHideInList: true,
+		browserOpt: {
+			width: 336,
+			height: 438,
+			resizable: false
+		}
+	}]
+
 
 	async startup(): Promise<void> {
 
@@ -45,169 +103,37 @@ export class ClientApplication {
 	}
 
 	private async launchProcess(): Promise<void> {
+		try {
+			const sharedProcess = new SharedProcess();
+			Logger.INSTANCE.info('SharedProcess is connecting!');
+			await sharedProcess.connect();
+			Logger.INSTANCE.info('SharedProcess connected!');
+
+			// 进入登录UI
+			new LoginBench().main()
+
+			// BackServiceMain.INSTANCE.main()
+		} catch (err) {
+			Logger.INSTANCE.error('launchProcess uncaughtException:', err)
+		}
+
 		this.createTray()
-		const sharedProcess = new SharedProcess();
-
-		Logger.INSTANCE.info('SharedProcess start connect!');
-		await sharedProcess.connect();
-		Logger.INSTANCE.info('SharedProcess connect success!');
-
-		// 进入登录UI
-		new LoginBench().main()
-
-		BackServiceMain.INSTANCE.main()
 	}
 
 	private registerListeners(): void {
 
+		Logger.INSTANCE.info('EntryMainProcess startup success!')
+
 		process.on('uncaughtException', (err) => {
-			Logger.INSTANCE.error('main uncaughtException:', err)
+			Logger.INSTANCE.local('main uncaughtException:', err)
 		})
 
 		process.on('unhandledRejection', (reason, p) => {
-			Logger.INSTANCE.error('main unhandledRejection:', reason, p)
+			Logger.INSTANCE.local('main unhandledRejection:', reason, p)
 		})
 
-		Logger.INSTANCE.info('EntryMainProcess startup success!')
-		session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-			callback({
-				responseHeaders: {
-					...details.responseHeaders,
-					'Content-Security-Policy': [
-						'default-src \'self\' http://127.0.0.1:* https://*.weierai.com wss://*.weierai.com ws://127.0.0.1:* https://at.alicdn.com \'unsafe-inline\' \'unsafe-eval\' data:',
-					]
-				}
-			})
-		})
-
-		session.defaultSession.on('will-download', (event, item) => {
-			Logger.INSTANCE.info('will-download', decodeURIComponent(item.getURL()))
-			item.setSavePath(path.join(process.cwd(), 'cache', item.getFilename()))
-			item.on('updated', (event, state) => {
-				if (state === 'progressing') {
-					if (item.isPaused()) {
-						Logger.INSTANCE.info('Download info', decodeURIComponent(item.getURL()), 'isPaused', state)
-					} else {
-						Logger.INSTANCE.info('Download info', decodeURIComponent(item.getURL()), state, (item.getReceivedBytes() / item.getTotalBytes() * 100).toFixed(2) + '%')
-					}
-				}
-				if (state === 'interrupted') {
-					Logger.INSTANCE.error('Download info', item.getURL(), state)
-				}
-			})
-			item.once('done', (event, state) => {
-				if (state === 'completed') {
-					Logger.INSTANCE.info('Download success', decodeURIComponent(item.getURL()), item.getSavePath(), state)
-					this.downloadCb[decodeURIComponent(item.getURL())](item.getSavePath())
-
-				} else {
-					Logger.INSTANCE.error('Download failed', item.getURL(), state)
-					this.downloadCb[decodeURIComponent(item.getURL())](false)
-				}
-			})
-		})
-
-
-		ipcMain.handle('client:getPath', async (event, pathName) => {
-			const result = app.getPath(pathName)
-			return result
-		})
-
-		ipcMain.handle('client:getAppDataDirPath', async (event, pathName) => {
-			const result = app.getPath('appData')
-			return path.join(result, '../')
-		})
-
-		ipcMain.handle('client:launchApp', async (event, appConf: IAppConfiguraiton) => {
-			const targetWindow = this.windowAppsMap.get(appConf.appName)
-			if (targetWindow) {
-				targetWindow.show()
-			} else {
-				Logger.INSTANCE.info('launchApp', appConf.appName);
-				return runApp(appConf)
-			}
-		})
-
-		process.on('uncaughtException', err => this.onUnexpectedError(err));
-		process.on('unhandledRejection', (reason: unknown) => onUnexpectedError(reason));
-
-		ipcMain.on('client:toggleDevTools', event => event.sender.toggleDevTools());
-		ipcMain.on('client:openDevTools', event => event.sender.openDevTools());
-
-
-
-		ipcMain.on('client:reloadWindow', event => event.sender.reload());
-
-		ipcMain.on('client:showOpenDialog', async (event, seq, options) => {
-			const url = await dialog.showOpenDialog(options)
-			event.senderFrame.postMessage('client:protocal-response', {
-				seq,
-				data: url
-			})
-		});
-
-		ipcMain.on('client:hideWindow', async (event, appName) => {
-			Logger.INSTANCE.info('UI hide', appName);
-			const win = this.windowAppsMap.get(appName)
-			win && win.hide()
-		});
-
-		ipcMain.on('proxy-apps-channel-request', (event, targetAppName: AppItemName, fromAppName: AppItemName) => {
-			// For security reasons, let's make sure only the frames we expect can
-			// access the worker.
-			const targetWindow = this.windowAppsMap.get(targetAppName)
-			if (targetWindow) {
-				// Create a new channel ...
-				const { port1, port2 } = new MessageChannelMain()
-				// ... send one end to the worker ...
-				targetWindow.webContents.postMessage('provide-apps-channel-event', fromAppName, [port1])
-				// ... and the other end to the main window.
-				event.senderFrame.postMessage('proxy-apps-channel-event', targetAppName, [port2])
-				// Now the main window and the worker can communicate with each other
-				// without going through the main process!
-			} else {
-				event.senderFrame.postMessage(`proxy-apps-channel-${targetAppName}-error`, null)
-			}
-		})
-
-		app.whenReady().then(() => {
-			// Register a 'CommandOrControl+X' shortcut listener.
-			globalShortcut.register('CommandOrControl+F12', () => {
-				// win && win.webContents.openDevTools()
-			})
-			globalShortcut.register('CommandOrControl+Alt+F12', () => {
-				ClientApplication.INSTANCE.windowAppsMap.forEach(win => {
-					win && win.webContents.openDevTools()
-				})
-			})
-		})
-
-
-		// 防止两次启动程序
-		const gotTheLock = app.requestSingleInstanceLock();
-		if (!gotTheLock) {
-			Logger.INSTANCE.info('Second Instance exit!');
-			app.exit();
-		} else {
-			app.on('second-instance', () => {
-				Logger.INSTANCE.info('Second Instance Launch!');
-				// Someone tried to run a second instance, we should focus our window.
-				let win = ClientApplication.INSTANCE.windowAppsMap.get(AppItemName.Dash_App)
-				win && win.show()
-				Logger.INSTANCE.info('UI show', AppItemName.Dash_App);
-			})
-		}
-
-		// GPU进程崩溃
-		app.on('gpu-process-crashed', function () {
-			Logger.INSTANCE.error('GPU进程崩溃，程序退出');
-			app.exit(0);
-		});
-
-		ipcMain.handle('client:downloadFile', async (event, appName, url) => {
-			const result = await this.handleDownload(appName, url)
-			return result
-		})
+		// process.on('uncaughtException', err => this.onUnexpectedError(err));
+		// process.on('unhandledRejection', (reason: unknown) => onUnexpectedError(reason));
 
 		// ipcMain.on('ondragstart', (event, filePath) => {
 		// 	Logger.INSTANCE.info('ondragstart', filePath);
@@ -217,6 +143,8 @@ export class ClientApplication {
 		// 	// })
 		// })
 
+		registerCommonEvent()
+		registerCustomerEvent()
 
 		Logger.INSTANCE.info('ClientApplication registerListeners success!');
 	}
@@ -237,57 +165,90 @@ export class ClientApplication {
 			this.tray.setToolTip('client-tool')
 			this.tray.setContextMenu(menu)
 			this.tray.on('click', () => {
-				let win = ClientApplication.INSTANCE.windowAppsMap.get(AppItemName.Dash_App)
+				let win = ClientApplication.INSTANCE.windowAppsMap.get(AppItemName.Sys_Dash_App)
 				if (win) {
 					win.show()
 				} else {
 					DashBench.INSTANCE.main()
 				}
-				Logger.INSTANCE.info('UI show', AppItemName.Dash_App);
+				Logger.INSTANCE.info('UI show', AppItemName.Sys_Dash_App);
 			})
 		})
 
 	}
 
-	private onUnexpectedError(err: Error): void {
-		// if (err) {
+	// private onUnexpectedError(err: Error): void {
+	// 	// if (err) {
 
-		// 	// take only the message and stack property
-		// 	const friendlyError = {
-		// 		message: `[uncaught exception in main]: ${err.message}`,
-		// 		stack: err.stack
-		// 	};
+	// 	// 	// take only the message and stack property
+	// 	// 	const friendlyError = {
+	// 	// 		message: `[uncaught exception in main]: ${err.message}`,
+	// 	// 		stack: err.stack
+	// 	// 	};
 
-		// 	// handle on client side
-		// 	this.windowsMainService?.sendToFocused('vscode:reportError', JSON.stringify(friendlyError));
-		// }
+	// 	// 	// handle on client side
+	// 	// 	this.windowsMainService?.sendToFocused('vscode:reportError', JSON.stringify(friendlyError));
+	// 	// }
 
-		Logger.INSTANCE.error(`[uncaught exception in main]: ${err}`);
-		if (err.stack) {
-			Logger.INSTANCE.error(err.stack);
-		}
-	}
+	// 	Logger.INSTANCE.error(`[uncaught exception in main]: ${err}`);
+	// 	if (err.stack) {
+	// 		Logger.INSTANCE.error(err.stack);
+	// 	}
+	// }
 
-	handleDownload(appName: AppItemName, url: string) {
-		return new Promise(resolve => {
-			try {
-				const win = this.windowAppsMap.get(appName)
-				Logger.INSTANCE.info('downloadURL find win', appName)
-				if (win) {
-					this.downloadCb[url] = (filePath) => {
-						resolve(filePath)
-					}
-					Logger.INSTANCE.info('downloadURL start', url)
-					win.webContents.downloadURL(url)
-				} else {
-					resolve(null)
-				}
-			} catch (err) {
-				Logger.INSTANCE.error('handleDownload', err)
-				resolve(null)
+	// 切换为版本号启动模式，因为目前稳定，所以暂时不启用
+	public async relaunch() {
+		try {
+			if (ClientApplication.INSTANCE._isRelaunching) {
+				return
+			} else {
+				ClientApplication.INSTANCE._isRelaunching = true
 			}
-		})
+			Logger.INSTANCE.info(`isCurrentVersionPkg`, isCurrentVersionPkg)
+			if (!isCurrentVersionPkg) {
+				app.releaseSingleInstanceLock()
+				app.relaunch({
+					args: process.argv.slice(1).filter(i => !(i.includes('start-version')))
+				})
+				app.exit()
+			} else {
+				const versionIniPath = path.join(VersionUdtService.INSTANCE.versionDir, './common.ini')
+				if (
+					fs.existsSync(versionIniPath)
+				) {
+					const iniData = ini.parse(fs.readFileSync(versionIniPath).toString())
+					const curVersion = await getVersionCommon()
+					if (iniData.common && iniData.common.ver && iniData.common.ver !== curVersion) {
+						let verExePath = `./${iniData.common.ver}/${AppPackageName}.exe`
+						if (fs.existsSync(path.join(VersionUdtService.INSTANCE.versionDir, verExePath))) {
+							app.releaseSingleInstanceLock()
+							let cmdStr = `cd ${VersionUdtService.INSTANCE.rootDir} && start ${AppPackageName}.exe ${process.argv.slice(1).join(' ')} --start-version`
+							Logger.INSTANCE.info('checkStartVersion cmd:', cmdStr)
+							child_process.exec(cmdStr, { cwd: process.cwd() }, function (error: any, stdout: any, stderr: any) {
+								Logger.INSTANCE.error('syncPddBat ink error: ', error)
+								Logger.INSTANCE.info('syncPddBat ink stdout: ', stdout)
+							})
+							setTimeout(() => {
+								app.exit()
+							}, 5000)
+							return
+						}
+					}
+				}
+				// app.releaseSingleInstanceLock()
+				app.relaunch({
+					args: process.argv.slice(1).filter(i => !(i.includes('start-version')))
+				})
+				app.exit()
+			}
+		} catch (err) {
+			Logger.INSTANCE.info(`main relaunch err`, err)
+		}
+
+
 	}
+
+
 }
 
 export default ClientApplication

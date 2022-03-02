@@ -1,13 +1,27 @@
 export const OutClientDir = 'out_client'
 
-export const AppName = 'Chrome'
+export const AppPackageName = 'client-tool'
 
-export const AppName_en = "Chrome"
+export enum EnvType {
+	dev = 'dev',
+	prod = 'prod',
+	pre = 'pre',
+	qa = 'qa'
+}
 
-// export const Download_Save_Path = app.getPath("downloads") + "\\" + AppName + "下载\\";
+let curEnv = EnvType.prod
+if (process.argv.find(i => i.includes('env-pre'))) {
+	curEnv = EnvType.pre
+}
+if (process.argv.find(i => i.includes('env-qa'))) {
+	curEnv = EnvType.qa
+}
+if (process.argv.find(i => i.includes('env-dev'))) {
+	curEnv = EnvType.dev
+}
 
-export const PROTOCOL = 'browser';
+console.log('cur env is', curEnv)
 
-export const Reg_Content = 'XWLM\\SOFTWARE\\Classes\\' + 'XwChrome'
+process.env['_client_cur_env'] = curEnv
 
-export const AppPackageName = '启明星'
+export const env = curEnv

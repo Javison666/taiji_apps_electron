@@ -1,5 +1,6 @@
+require('bytenode')
 window.PageLoaded = true
 
-const { main } = require('./backServiceMain.js')
+const { main } = require('./backServiceMain')
 main()
 

@@ -12,7 +12,7 @@ export const setAppStorage = async (reqData: IItemStorageReqSetItem) => {
 export const getAppStorage = async (reqData: IItemStorageReqGetItem) => {
 	return client.ipcMessagePort.callApp(AppItemName.Shared_Process, {
 		channelType: ItemStorageChannelCommand.mainCommand,
-		channelCommand: ItemStorageChannelCommand.subCommand.getItem,
+		channelCommand: ItemStorageChannelCommand.subCommand.getItemContent,
 		reqData
 	})
 }

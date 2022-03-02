@@ -1,6 +1,7 @@
 import Logger from 'client/platform/environment/node/logger'
 // import VersionUpdateService from 'client/workbench/apps/backService/services/versionUpdateService'
 
+
 class BackServiceApp {
 	public static readonly INSTANCE = new BackServiceApp()
 
@@ -26,7 +27,9 @@ class BackServiceApp {
 			}
 			return null
 		})
+
 	}
+
 }
 
 export default BackServiceApp

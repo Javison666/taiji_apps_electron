@@ -7,7 +7,7 @@ import MockWsServer from 'src_page/page/apps/test_qn/services/mockWsServer'
 import Logger from 'src/client/platform/environment/node/logger'
 
 window.PageLoaded = true
-Logger.INSTANCE.init(client.app.appName)
+Logger.INSTANCE.init(AppItemName.Test_Qn)
 
 async function main(): Promise<void> {
 
@@ -15,8 +15,8 @@ async function main(): Promise<void> {
 		await window.client.ipcMessagePort.connectApp(AppItemName.Shared_Process)
 	}
 
-	MockWsServer.INSTANCE.main()
-
+	await MockWsServer.INSTANCE.main()
+	document.getElementById('preload-dom')?.remove()
 	const app = createApp(App)
 	app.use(router)
 	app.mount('#app')

@@ -25,26 +25,45 @@ class ItemStorageService {
 	}
 
 	async handleTask(appName: AppItemName, channelData: { channelCommand: string, reqData: any }) {
+		let targetAppName = appName
+		if (channelData.reqData && channelData.reqData.targetAppName) {
+			targetAppName = channelData.reqData.targetAppName
+		}
 		switch (channelData.channelCommand) {
 			case ItemStorageChannelCommand.subCommand.setItem:
-				return this.setItem(appName, channelData.reqData)
+				return this.setItem(targetAppName, channelData.reqData)
 			case ItemStorageChannelCommand.subCommand.getItem:
-				return this.getItem(appName, channelData.reqData)
+				return this.getItem(targetAppName, channelData.reqData)
+			case ItemStorageChannelCommand.subCommand.getItemContent:
+				return this.getItemContent(targetAppName, channelData.reqData)
 			default:
 				break
 		}
 	}
 
 	async getItem(appName: AppItemName, reqData: IItemStorageReqGetItem): Promise<void> {
-		return ShareStorage.INSTANCE.allSql(
+		return ShareStorage.INSTANCE.getSql(
 			`select * from item_storage where app_name='${appName}' and item_name='${reqData.itemName}';`
 		)
 	}
 
+	async getItemContent(appName: AppItemName, reqData: IItemStorageReqGetItem): Promise<void> {
+		let itemData: any = await ShareStorage.INSTANCE.getSql(
+			`select * from item_storage where app_name='${appName}' and item_name='${reqData.itemName}';`
+		)
+		if (itemData && itemData.item_content) {
+			return itemData.item_content
+		}
+		return itemData
+	}
+
 	async setItem(appName: AppItemName, reqData: IItemStorageReqSetItem): Promise<void> {
+		// let sql = `INSERT OR IGNORE INTO item_storage (app_name, item_name, item_content) VALUES ('${appName}', '${reqData.itemName}', '${reqData.itemContent}');
+		// UPDATE item_storage SET item_content = '${reqData.itemContent}' WHERE app_name='${appName}' and item_name='${reqData.itemName}}';`
+		let sql = `INSERT OR REPLACE INTO item_storage (app_name, item_name, item_content) VALUES ('${appName}', '${reqData.itemName}', '${reqData.itemContent}');
+		UPDATE item_storage SET item_content = '${reqData.itemContent}' WHERE app_name='${appName}' and item_name='${reqData.itemName}}';`
 		return ShareStorage.INSTANCE.execSql(
-			`INSERT OR IGNORE INTO item_storage (app_name, item_name, item_content) VALUES ('${appName}', '${reqData.itemName}', '${reqData.itemContent}');
-			UPDATE item_storage SET item_content = '${reqData.itemContent}' WHERE app_name='${appName}' and item_name='${reqData.itemName}}';`
+			sql
 		)
 	}
 }

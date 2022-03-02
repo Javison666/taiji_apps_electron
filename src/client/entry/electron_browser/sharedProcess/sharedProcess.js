@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-
+require('bytenode')
 // import './sharedProcessMain.js';
 
 window.PageLoaded = true
 
-const { main } = require('./sharedProcessMain.js')
+const { main } = require('./sharedProcessMain')
 main()
 //@ts-check
 // (function () {
