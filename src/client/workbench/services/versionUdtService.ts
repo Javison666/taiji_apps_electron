@@ -3,7 +3,7 @@ import { ipcRenderer } from 'electron';
 import Logger from 'client/platform/environment/node/logger'
 import { AppItemName } from 'client/workbench/protocals/commonProtocal'
 import VersionDecoder from 'client/workbench/utils/versionDecoder'
-import { getVersionCommon, isPackagedCommon } from 'client/base/common/network'
+import { getVersionCommon } from 'client/base/common/network'
 import * as path from 'path'
 import { IVersionInfoData, VersionUdtChannelCommand } from 'client/workbench/protocals/versionUdtServiceProtocal';
 import * as ini from 'ini'
@@ -99,59 +99,27 @@ class VersionUdtService {
 			}
 			Logger.INSTANCE.info('start download', VersionUdtService.INSTANCE.newVersionInfo)
 			let versionUrl = VersionUdtService.INSTANCE.newVersionInfo.newVersionDetails.clientUrl
-			let versionNo = VersionUdtService.INSTANCE.newVersionInfo.newVersionDetails.versionNo
+			// let versionNo = VersionUdtService.INSTANCE.newVersionInfo.newVersionDetails.versionNo
 			await fsExtra.mkdirp(VersionUdtService.INSTANCE.versionDir)
 			// 下载新版本包
-			const downloadPath = await ipcRenderer.invoke('client:downloadFile', AppItemName.Sys_Udt_App, versionUrl)
+			const downloadPath = await ipcRenderer.invoke('client:downloadFile', {
+				appName: AppItemName.Sys_Udt_App,
+				url: versionUrl,
+				isProcessListen: true,
+				type: 'versionFile'
+			})
 			Logger.INSTANCE.info('downloadPath', downloadPath)
 			if (downloadPath) {
-				// 下载成功
-				const newVersionPkgPath = path.join(VersionUdtService.INSTANCE.versionDir, versionNo)
-				const newVersionPkdData = `${newVersionPkgPath}.zip`
-				Logger.INSTANCE.info('del newVersionPkdData', newVersionPkgPath)
-				await fsExtra.remove(newVersionPkgPath)
-				await fsExtra.remove(newVersionPkdData)
-				// 移动到版本管理目录
-				Logger.INSTANCE.info('checkUpdate move start', downloadPath, '->', newVersionPkdData)
-				await fsExtra.move(downloadPath, newVersionPkdData)
-				// 解压
-				try {
-					await VersionUdtService.INSTANCE.runUnzipVersion(versionNo)
-					await fsExtra.remove(newVersionPkdData)
-				} catch (extractErr) {
-					Logger.INSTANCE.error('extractErr error', extractErr)
-				}
-				await this.udtVersionIni(versionNo)
-				VersionUdtService.INSTANCE._newVersionReady = true
-				ipcRenderer.send('client:udtClientSuccess');
+				child_process.spawn(downloadPath, ['/S'], {
+					detached: true,
+					stdio: ['ignore', 'ignore', 'ignore'],
+					windowsVerbatimArguments: true
+				});
 			}
 
 		} catch (err) {
 			Logger.INSTANCE.error('updateClient err', err)
 		}
-	}
-
-	public async runUnzipVersion(version: string) {
-		return new Promise((resolve, reject) => {
-			const cmd = `".${isPackagedCommon() ? '\\resources' : ''}\\public\\7z.exe" x .\\versions\\${version}.zip -o.\\versions\\${version}`
-			const cwd = path.join(VersionUdtService.INSTANCE.versionDir, '../')
-			Logger.INSTANCE.info('runUnzipVersion cmd:', cmd, cwd)
-			const workerProcess = child_process.exec(cmd, { cwd })
-			// 打印正常的后台可执行程序输出
-			workerProcess.stdout.on('data', function (data: any) {
-				Logger.INSTANCE.error('runUnzip error stdout', data)
-			})
-			// 打印错误的后台可执行程序输出
-			workerProcess.stderr.on('data', function (data: any) {
-				Logger.INSTANCE.error('runUnzip error stderr', data)
-				reject(data)
-			})
-			// 退出之后的输出
-			workerProcess.on('close', function (code: any) {
-				Logger.INSTANCE.info('runUnzip end', code)
-				resolve(null)
-			})
-		})
 	}
 
 	public async startLoopCheckUdt() {

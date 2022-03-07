@@ -30,5 +30,3 @@ function getDirSuffixFiles(uri, suffix) {
     return result;
 }
 exports.getDirSuffixFiles = getDirSuffixFiles;
-// let list = getDirSuffixFiles(path.join(process.cwd(), 'out_client/client'), '.js')
-// console.log(list.map(i => i.replace(process.cwd() + '\\', '')))

@@ -24,7 +24,8 @@ class EntryMainProcess {
 				Logger.INSTANCE.local('EntryMainProcess main:', err)
 			}
 			this.processHeart()
-			await this.checkStartVersion()
+			this.startup()
+			// await this.checkStartVersion()
 		} catch (error) {
 			Logger.INSTANCE.error('EntryMainProcess.main', error.message);
 			app.exit(1);
@@ -44,9 +45,8 @@ class EntryMainProcess {
 		await ClientApplication.INSTANCE.startup()
 	}
 
-
 	// 切换为版本号启动模式，因为目前稳定，所以暂时不启用
-	private async checkStartVersion() {
+	public async checkStartVersion() {
 		try {
 			if (process.argv.find(i => i.includes('start-version'))) {
 				this.startup()

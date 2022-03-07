@@ -132,9 +132,6 @@ export class ClientApplication {
 			Logger.INSTANCE.local('main unhandledRejection:', reason, p)
 		})
 
-		// process.on('uncaughtException', err => this.onUnexpectedError(err));
-		// process.on('unhandledRejection', (reason: unknown) => onUnexpectedError(reason));
-
 		// ipcMain.on('ondragstart', (event, filePath) => {
 		// 	Logger.INSTANCE.info('ondragstart', filePath);
 		// 	// event.sender.startDrag({
@@ -177,26 +174,6 @@ export class ClientApplication {
 
 	}
 
-	// private onUnexpectedError(err: Error): void {
-	// 	// if (err) {
-
-	// 	// 	// take only the message and stack property
-	// 	// 	const friendlyError = {
-	// 	// 		message: `[uncaught exception in main]: ${err.message}`,
-	// 	// 		stack: err.stack
-	// 	// 	};
-
-	// 	// 	// handle on client side
-	// 	// 	this.windowsMainService?.sendToFocused('vscode:reportError', JSON.stringify(friendlyError));
-	// 	// }
-
-	// 	Logger.INSTANCE.error(`[uncaught exception in main]: ${err}`);
-	// 	if (err.stack) {
-	// 		Logger.INSTANCE.error(err.stack);
-	// 	}
-	// }
-
-	// 切换为版本号启动模式，因为目前稳定，所以暂时不启用
 	public async relaunch() {
 		try {
 			if (ClientApplication.INSTANCE._isRelaunching) {

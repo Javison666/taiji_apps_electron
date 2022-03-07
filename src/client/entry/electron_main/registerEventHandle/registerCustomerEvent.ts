@@ -7,41 +7,7 @@ import path = require('path')
 import Background from 'client/entry/electron_main/background'
 import { ITaskConf } from 'client/workbench/apps/ttcode/lib/TTcodeService'
 import TTcode from 'client/workbench/apps/ttcode/electron-main'
-
-type urlStr = string
-type downloadProcess = Number
-
-const downloadCb: {
-	[propertyNames: string]: {
-		item?: Electron.DownloadItem,
-		cb: (...params: any) => void
-	}
-} = {}
-const backServiceDownloadProcessMap: Map<urlStr, downloadProcess> = new Map()
-
-export function handleDownload(appName: AppItemName, url: string) {
-	return new Promise(resolve => {
-		try {
-			let win
-			win = ClientApplication.INSTANCE.windowAppsMap.get(appName)
-			Logger.INSTANCE.info('downloadURL find win', appName)
-			if (win) {
-				downloadCb[url] = {
-					cb: (filePath) => {
-						resolve(filePath)
-					}
-				}
-				Logger.INSTANCE.info('downloadURL start', url)
-				win.webContents.downloadURL(url)
-			} else {
-				resolve(null)
-			}
-		} catch (err) {
-			Logger.INSTANCE.error('handleDownloadErr', err)
-			resolve(null)
-		}
-	})
-}
+import DownloadService, { downloadCb, downloadProcessMap } from 'client/workbench/services/downloadService'
 
 
 export default () => {
@@ -80,7 +46,7 @@ export default () => {
 
 	ipcMain.on('client:destroyWindow', async (event, appName: AppItemName) => {
 		if (appName) {
-			Logger.INSTANCE.info('UI close', appName);
+			Logger.INSTANCE.info('UI destroy', appName);
 			const win = ClientApplication.INSTANCE.windowAppsMap.get(appName)
 			win && win.destroy()
 			ClientApplication.INSTANCE.windowAppsMap.delete(appName)
@@ -89,14 +55,6 @@ export default () => {
 			win?.destroy()
 		}
 	});
-
-	ipcMain.on('client:udtClientSuccess', async (event) => {
-		let win = ClientApplication.INSTANCE.windowAppsMap.get(AppItemName.Sys_Udt_App)
-		if (win) {
-			win && win.show()
-			win.webContents.executeJavaScript('console.log("udtClientSuccess");client.bridge.call({cmd:"udtClientSuccess"})')
-		}
-	})
 
 	ipcMain.on('client:showAppNameContextMenu', (event, appName: AppItemName, command: string, labelList: (Electron.MenuItemConstructorOptions | Electron.MenuItem)[]) => {
 		let win = BrowserWindow.fromWebContents(event.sender)
@@ -132,8 +90,16 @@ export default () => {
 	})
 
 
-	ipcMain.handle('client:downloadFile', async (event, appName, url) => {
-		const result = await handleDownload(appName, url)
+	ipcMain.handle('client:downloadFile', async (event, { appName, url, isProcessListen, type }) => {
+		if (isProcessListen) {
+			downloadProcessMap.set(url, {
+				appName,
+				isProcessListen,
+				type,
+				process: 0
+			})
+		}
+		const result = await DownloadService.INSTANCE.handleDownload(appName, url)
 		downloadCb[url] && delete downloadCb[url]
 		return result
 	})
@@ -166,7 +132,12 @@ export default () => {
 	})
 
 	ipcMain.handle('client:showUdtWindow', async (event, ver: string, url: string) => {
-		backServiceDownloadProcessMap.set(url, 0)
+		// 重置下载项
+		let downItem = downloadProcessMap.get(url)
+		if (downItem) {
+			downItem.process = 0
+			downloadProcessMap.set(url, downItem)
+		}
 		runApp({
 			appName: AppItemName.Sys_Udt_App,
 			appNick: '版本更新',
@@ -177,15 +148,6 @@ export default () => {
 				height: 200,
 			}
 		})
-	})
-
-	ipcMain.handle('client:getBackServiceDownloadProcess', async (event, url: string) => {
-		Logger.INSTANCE.info('getBackServiceDownloadProcess', url, backServiceDownloadProcessMap.get(url))
-		const process = backServiceDownloadProcessMap.get(url)
-		if (!process) {
-			return 0
-		}
-		return process
 	})
 
 	session.defaultSession.on('will-download', (event, item) => {
@@ -200,25 +162,33 @@ export default () => {
 					Logger.INSTANCE.info('Download info', decodeURIComponent(item.getURL()), 'isPaused', state)
 				} else {
 					let processNum = item.getReceivedBytes() / item.getTotalBytes()
-					Logger.INSTANCE.info('backServiceDownloadProcessMap.set', decodeURIComponent(item.getURL()))
-					backServiceDownloadProcessMap.set(decodeURIComponent(item.getURL()), processNum)
+					Logger.INSTANCE.info('downloadProcessMap.set', decodeURIComponent(item.getURL()))
+					DownloadService.INSTANCE.updateProcess(decodeURIComponent(item.getURL()), processNum)
 					Logger.INSTANCE.info('Download info', decodeURIComponent(item.getURL()), state, (processNum * 100).toFixed(2) + '%')
 				}
 			}
 			if (state === 'interrupted') {
-				backServiceDownloadProcessMap.set(decodeURIComponent(item.getURL()), -1)
+				let downItem = downloadProcessMap.get(decodeURIComponent(item.getURL()))
+				if (downItem) {
+					downItem.process = -1
+					downloadProcessMap.set(decodeURIComponent(item.getURL()), downItem)
+				}
 				Logger.INSTANCE.error('Download info', item.getURL(), state)
 			}
 		})
 		item.once('done', (event, state) => {
 			if (state === 'completed') {
-				backServiceDownloadProcessMap.set(decodeURIComponent(item.getURL()), 100)
+				DownloadService.INSTANCE.updateProcess(decodeURIComponent(item.getURL()), 100)
 				Logger.INSTANCE.info('Download success', decodeURIComponent(item.getURL()), item.getSavePath(), state)
 				downloadCb[decodeURIComponent(item.getURL())].cb(item.getSavePath())
 
 			} else {
 				Logger.INSTANCE.error('Download failed', item.getURL(), state)
-				backServiceDownloadProcessMap.set(decodeURIComponent(item.getURL()), -1)
+				let downItem = downloadProcessMap.get(decodeURIComponent(item.getURL()))
+				if (downItem) {
+					downItem.process = -1
+					downloadProcessMap.set(decodeURIComponent(item.getURL()), downItem)
+				}
 				downloadCb[decodeURIComponent(item.getURL())].cb(false)
 			}
 		})

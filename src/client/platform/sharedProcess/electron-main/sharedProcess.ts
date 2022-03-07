@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { BrowserWindow, ipcMain, Event as ElectronEvent, IpcMainEvent, app } from 'electron';
+import { BrowserWindow, ipcMain, Event as ElectronEvent, app } from 'electron';
 import { ClientApplication } from 'client/entry/electron_main/app'
 import { AppItemName } from 'client/workbench/protocals/commonProtocal'
 import { fileFromClientResource, fileFromUserDataCommon } from 'client/base/common/network'
@@ -28,27 +28,8 @@ export class SharedProcess {
 	}
 
 	private registerListeners(): void {
-
 		// Lifecycle
-
 		// Shared process connections from workbench windows
-		ipcMain.on('client:createSharedProcessMessageChannel', async (e, nonce: string) => this.onWindowConnection(e, nonce));
-	}
-
-	private async onWindowConnection(e: IpcMainEvent, nonce: string): Promise<void> {
-
-		await this.whenReady();
-
-		// connect to the shared process window
-		// const port = await this.connect();
-
-		// Check back if the requesting window meanwhile closed
-		// Since shared process is delayed on startup there is
-		// a chance that the window close before the shared process
-		// was ready for a connection.
-
-		// send the port back to the requesting window
-		// e.sender.postMessage('vscode:createSharedProcessMessageChannelResult', nonce, [port]);
 	}
 
 	// private onWillShutdown(): void {
@@ -133,7 +114,6 @@ export class SharedProcess {
 				webSecurity: false,
 				allowRunningInsecureContent: true,
 				preload: path.join(__dirname, '../../../base/parts/sandbox/electron_browser/preload.js'),
-				// preload: fileFromClientResource('client/base/parts/sandbox/electron_browser/preload.js'),
 				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${AppItemName.Shared_Process}`, `--is-packaged=${Number(app.isPackaged)}`, `--env-${env}`],
 				nodeIntegration: true,
 				contextIsolation: false,
@@ -150,7 +130,26 @@ export class SharedProcess {
 		if (process.argv.find(i => i.includes('debug')) || !app.isPackaged) {
 			this.window.webContents.openDevTools();
 		}
+	}
 
+	private registerWindowListeners(): void {
+		if (!this.window) {
+			return;
+		}
+
+		// Prevent the window from closing
+		this.windowCloseListener = (e: ElectronEvent) => {
+
+			// We never allow to close the shared process unless we get explicitly disposed()
+			e.preventDefault();
+
+			// Still hide the window though if visible
+			if (this.window?.isVisible()) {
+				this.window.hide();
+			}
+		};
+
+		this.window.on('close', this.windowCloseListener);
 
 
 		this.window.once('close', () => {
@@ -187,27 +186,6 @@ export class SharedProcess {
 
 		hanleWindowRenderProtect(this.window, AppItemName.Shared_Process, () => {
 		})
-
-	}
-
-	private registerWindowListeners(): void {
-		if (!this.window) {
-			return;
-		}
-
-		// Prevent the window from closing
-		this.windowCloseListener = (e: ElectronEvent) => {
-
-			// We never allow to close the shared process unless we get explicitly disposed()
-			e.preventDefault();
-
-			// Still hide the window though if visible
-			if (this.window?.isVisible()) {
-				this.window.hide();
-			}
-		};
-
-		this.window.on('close', this.windowCloseListener);
 
 		// Crashes & Unresponsive & Failed to load
 		// We use `onUnexpectedError` explicitly because the error handler
