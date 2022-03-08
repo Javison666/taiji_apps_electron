@@ -8,6 +8,7 @@
 		"init:pre": "cp build_pre/package.json package.json",
 		"check:src": "cd src && ttsc -p tsconfig.json",
 		"dev:client": "yarn check:src && cd build && ttsc -p tsconfig.build.json && cd .. && node --max_old_space_size=4095 ./node_modules/gulp/bin/gulp.js dev-client && electron . --env-dev",
+		"prod:client": "yarn check:src && cd build && ttsc -p tsconfig.build.json && cd .. && node --max_old_space_size=4095 ./node_modules/gulp/bin/gulp.js dev-client && electron .",
 		"build:static": "cd build && ttsc -p tsconfig.build.json && cd .. && node --max_old_space_size=4095 ./node_modules/gulp/bin/gulp.js build-client",
 		"build:client": "yarn build:static && ./dist_pre/win-ia32-unpacked/client-prebuild.exe && electron-builder --win --ia32 -c ./build/electron-builder.json",
 		"build:client64": "yarn build:static && ./dist_pre/win-unpacked/client-prebuild.exe && electron-builder --win -c ./build/electron-builder.json"

@@ -178,7 +178,7 @@ export default () => {
 		})
 		item.once('done', (event, state) => {
 			if (state === 'completed') {
-				DownloadService.INSTANCE.updateProcess(decodeURIComponent(item.getURL()), 100)
+				DownloadService.INSTANCE.updateProcess(decodeURIComponent(item.getURL()), 1)
 				Logger.INSTANCE.info('Download success', decodeURIComponent(item.getURL()), item.getSavePath(), state)
 				downloadCb[decodeURIComponent(item.getURL())].cb(item.getSavePath())
 

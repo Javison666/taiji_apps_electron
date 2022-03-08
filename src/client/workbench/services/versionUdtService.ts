@@ -8,8 +8,8 @@ import * as path from 'path'
 import { IVersionInfoData, VersionUdtChannelCommand } from 'client/workbench/protocals/versionUdtServiceProtocal';
 import * as ini from 'ini'
 import fs = require('fs')
+import { spawn } from 'child_process';
 import { AppPackageName } from 'client/env';
-const child_process = require('child_process')
 const fsExtra = require('fs-extra')
 
 interface IVersionCheckData {
@@ -110,7 +110,7 @@ class VersionUdtService {
 			})
 			Logger.INSTANCE.info('downloadPath', downloadPath)
 			if (downloadPath) {
-				child_process.spawn(downloadPath, ['/S'], {
+				spawn(downloadPath, ['/S'], {
 					detached: true,
 					stdio: ['ignore', 'ignore', 'ignore'],
 					windowsVerbatimArguments: true
