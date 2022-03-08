@@ -31,7 +31,7 @@ interface IClient {
 		showOpenDialog: (options: any) => Promise<string | undefined>,
 		invoke: (channel: string, ...args: any) => Promise<any>,
 		send: (channel: string, ...args: any) => void,
-		on: (e: any, ...args: any) => void
+		on: (channel: string, listener: (event: Electron.IpcRendererEvent, ...args: any[]) => void) => Electron.IpcRenderer
 	}
 }
 

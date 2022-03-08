@@ -4,7 +4,7 @@ import App from './App.vue'
 import 'src_page/page/style/index.css'
 import { AppItemName } from 'src/client/workbench/protocals/commonProtocal'
 import Logger from 'src/client/platform/environment/node/logger'
-import handleBridgeMsg from './bridge/handleBridgeMsg'
+import render from './render'
 
 window.PageLoaded = true
 Logger.INSTANCE.init(AppItemName.Sys_Udt_App)
@@ -21,7 +21,7 @@ async function main(): Promise<void> {
 	app.use(router)
 	app.mount('#app')
 
-	client.bridge.call = ((data: any) => handleBridgeMsg(data))
+	render()
 }
 
 main()

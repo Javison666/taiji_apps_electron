@@ -2,7 +2,7 @@
   <div class="p-2 pt-0 w-full h-full">
     <div class="mb-1">
       <router-link to="/localTasks/lowcode?status=new">
-        <div class="j-button text-xs" @click="addLowcodeStep(idx)">
+        <div class="j-button text-xs">
           新增
         </div>
       </router-link>
