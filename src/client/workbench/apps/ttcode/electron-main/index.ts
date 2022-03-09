@@ -45,7 +45,7 @@ class TTcode {
 		try {
 			return TTCodeService.INSTANCE.decodeTTFileSync(path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
 		} catch (err) {
-			Logger.INSTANCE.error('getTTcodeTask err:', err);
+			Logger.INSTANCE.error('getTTcodeTaskByName err:', err);
 		}
 		return
 	}

@@ -78,7 +78,13 @@ export default () => {
     }
 
     const delTTcodeTaskByName = async (name: string) => {
-
+        const res = await client.ipcRenderer.invoke(
+            "client:showHandleWindow",
+            `确认删除快捷操作(${name})吗?`
+        );
+        if(res){
+            await client.ipcRenderer.invoke('client:delLowcodeAppByName', name)
+        }
     }
 
     const runTTcodeTaskByName = async (name: string) => {
@@ -95,7 +101,8 @@ export default () => {
         addLowcodeStep,
         delLowcodeStep,
         saveLowcodeApp,
-        runTTcodeTaskByName
+        runTTcodeTaskByName,
+        delTTcodeTaskByName
     }
 }
 

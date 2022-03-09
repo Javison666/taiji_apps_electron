@@ -16,7 +16,7 @@
         <span class="flex-grow text-left">{{ item }}</span>
         <a href="#" class="mr-2" @click.prevent="runTTcodeTaskByName(item)">运行</a>
         <router-link :to="'/localTasks/lowcode?status=edit&name=' + item" class="mr-2">修改</router-link>
-        <a href="#" @click.prevent="runTTcodeTaskByName(item)">删除</a>
+        <a href="#" @click.prevent="delTTcode(item)">删除</a>
       </div>
     </div>
   </div>
@@ -32,8 +32,14 @@ export default defineComponent({
     const {
       initTTcodeList,
       ttcodeAppList,
-      runTTcodeTaskByName
+      runTTcodeTaskByName,
+      delTTcodeTaskByName
     } = useLowcode();
+
+    const delTTcode = async (name: string) => {
+      await delTTcodeTaskByName(name)
+      initTTcodeList()
+    }
 
     initTTcodeList();
 
@@ -41,6 +47,7 @@ export default defineComponent({
       ttcodeAppList,
       initTTcodeList,
       runTTcodeTaskByName,
+      delTTcode
     };
   },
 });

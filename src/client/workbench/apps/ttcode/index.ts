@@ -19,7 +19,7 @@ class TTcodeApp {
 			let title = query.taskTitle
 			Logger.INSTANCE.info('TTcodeApp start:', title)
 			if (title) {
-				const conf = <ITaskConf>await client.ipcRenderer.invoke('client:getTTcodeTask', title)
+				const conf = <ITaskConf>await client.ipcRenderer.invoke('client:getTTcodeTaskByName', title)
 				Logger.INSTANCE.info('TTcodeApp conf:', conf)
 				conf && TTCodeService.INSTANCE.runTaskConfSync(conf)
 			}

@@ -17,7 +17,7 @@
     </div>
     <div>
       <div class="mb-2" v-for="(step, idx) in lowcodeApp.steps" :key="idx">
-        <div class="j-button text-xs mb-1" @click="addLowcodeStep(idx)">
+        <div class="j-button text-xs mb-1 opacity-80" @click="addLowcodeStep(idx)">
           添加步骤
         </div>
         <div class="border-2 border-b-0 text-sm pl-1">
@@ -52,7 +52,7 @@
           </div>
         </div>
       </div>
-      <div class="j-button text-xs mb-1" @click="addLowcodeStep(lowcodeApp.steps.length)">
+      <div class="j-button text-xs mb-1 opacity-80" @click="addLowcodeStep(lowcodeApp.steps.length)">
         添加步骤
       </div>
       <div class="j-button text-sm mt-4 text-center text-white bg-green-600" @click="saveLowcodeApp">
