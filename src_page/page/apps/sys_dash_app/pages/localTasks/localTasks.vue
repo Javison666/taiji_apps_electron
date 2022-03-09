@@ -9,13 +9,14 @@
     </div>
     <div>
       <div
-        class="bg-green-700 text-white cursor-pointer flex text-xs p-2"
+        class="bg-green-700 text-white cursor-pointer flex text-xs p-1.5 mt-0.5"
         v-for="(item, idx) in ttcodeAppList"
         :key="idx"
       >
         <span class="flex-grow text-left">{{ item }}</span>
         <a href="#" class="mr-2" @click.prevent="runTTcodeTaskByName(item)">运行</a>
-        <router-link :to="'/localTasks/lowcode?status=edit&name=' + item">修改</router-link>
+        <router-link :to="'/localTasks/lowcode?status=edit&name=' + item" class="mr-2">修改</router-link>
+        <a href="#" @click.prevent="runTTcodeTaskByName(item)">删除</a>
       </div>
     </div>
   </div>
@@ -28,17 +29,11 @@ import useLowcode from "src_page/page/use/useLowcode";
 export default defineComponent({
   name: "localTask",
   setup() {
-    const { initTTcodeList, ttcodeAppList, runTTcodeTaskByName } = useLowcode();
-    // code E:\reverse-gitlab\qn-remote-js-new-version\qn-remote-js
-    // const openVscode = () => {
-    //   client.ipcRenderer.invoke('client:runTTcodeTask', {
-    //     name: 'test',
-    //     steps: [{
-    //       stepType: 'cmd',
-    //       value: `code E:\\reverse-gitlab\\qn-remote-js-new-version\\qn-remote-js`
-    //     }]
-    //   })
-    // };
+    const {
+      initTTcodeList,
+      ttcodeAppList,
+      runTTcodeTaskByName
+    } = useLowcode();
 
     initTTcodeList();
 

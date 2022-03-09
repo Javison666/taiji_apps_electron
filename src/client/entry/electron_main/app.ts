@@ -4,18 +4,11 @@ import Logger from 'client/platform/environment/node/logger'
 import { AppItemName, IAppConfiguraiton, IAppType } from 'client/workbench/protocals/commonProtocal'
 import { SharedProcess } from 'client/platform/sharedProcess/electron-main/sharedProcess'
 import LoginBench from 'client/workbench/main/loginBench/electron-main/index'
-import { fileFromPublicResource, getVersionCommon } from 'client/base/common/network'
+import { fileFromPublicResource } from 'client/base/common/network'
 import DashBench from 'client/workbench/main/dashBench/electron-main'
 import registerCommonEvent from 'client/entry/electron_main/registerEventHandle/registerCommonEvent'
 import registerCustomerEvent from 'client/entry/electron_main/registerEventHandle/registerCustomerEvent'
-
-import VersionUdtService, { isCurrentVersionPkg } from 'client/workbench/services/versionUdtService'
-import * as ini from 'ini'
-import child_process = require('child_process');
-import path = require('path')
-import fs = require('fs')
-import { AppPackageName } from 'client/env'
-
+import registerTTcodeEvent from 'client/entry/electron_main/registerEventHandle/registerTTcodeEvent'
 /**
  * The main client application. There will only ever be one instance,
  * even if the user starts many instances (e.g. from the command line).
@@ -29,8 +22,6 @@ export class ClientApplication {
 	public clientData = {
 		staticServerPort: 0,
 	};
-
-	private _isRelaunching = false
 
 	// public appList: IAppConfiguraiton[] = [{
 	// 	appName: AppItemName.Hunter_App,
@@ -60,15 +51,6 @@ export class ClientApplication {
 		browserOpt: {
 			width: 800,
 			height: 600
-		}
-	}, {
-		appName: AppItemName.Douyin_App,
-		appNick: '抖音App',
-		querys: '',
-		appType: IAppType.Share_Web,
-		browserOpt: {
-			width: 300,
-			height: 200
 		}
 	}, {
 		appName: AppItemName.Sys_Udt_App,
@@ -142,6 +124,7 @@ export class ClientApplication {
 
 		registerCommonEvent()
 		registerCustomerEvent()
+		registerTTcodeEvent()
 
 		Logger.INSTANCE.info('ClientApplication registerListeners success!');
 	}
@@ -175,53 +158,6 @@ export class ClientApplication {
 	}
 
 	public async relaunch() {
-		try {
-			if (ClientApplication.INSTANCE._isRelaunching) {
-				return
-			} else {
-				ClientApplication.INSTANCE._isRelaunching = true
-			}
-			Logger.INSTANCE.info(`isCurrentVersionPkg`, isCurrentVersionPkg)
-			if (!isCurrentVersionPkg) {
-				app.releaseSingleInstanceLock()
-				app.relaunch({
-					args: process.argv.slice(1).filter(i => !(i.includes('start-version')))
-				})
-				app.exit()
-			} else {
-				const versionIniPath = path.join(VersionUdtService.INSTANCE.versionDir, './common.ini')
-				if (
-					fs.existsSync(versionIniPath)
-				) {
-					const iniData = ini.parse(fs.readFileSync(versionIniPath).toString())
-					const curVersion = await getVersionCommon()
-					if (iniData.common && iniData.common.ver && iniData.common.ver !== curVersion) {
-						let verExePath = `./${iniData.common.ver}/${AppPackageName}.exe`
-						if (fs.existsSync(path.join(VersionUdtService.INSTANCE.versionDir, verExePath))) {
-							app.releaseSingleInstanceLock()
-							let cmdStr = `cd ${VersionUdtService.INSTANCE.rootDir} && start ${AppPackageName}.exe ${process.argv.slice(1).join(' ')} --start-version`
-							Logger.INSTANCE.info('checkStartVersion cmd:', cmdStr)
-							child_process.exec(cmdStr, { cwd: process.cwd() }, function (error: any, stdout: any, stderr: any) {
-								Logger.INSTANCE.error('syncPddBat ink error: ', error)
-								Logger.INSTANCE.info('syncPddBat ink stdout: ', stdout)
-							})
-							setTimeout(() => {
-								app.exit()
-							}, 5000)
-							return
-						}
-					}
-				}
-				// app.releaseSingleInstanceLock()
-				app.relaunch({
-					args: process.argv.slice(1).filter(i => !(i.includes('start-version')))
-				})
-				app.exit()
-			}
-		} catch (err) {
-			Logger.INSTANCE.info(`main relaunch err`, err)
-		}
-
 
 	}
 

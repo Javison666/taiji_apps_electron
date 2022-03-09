@@ -1,18 +1,17 @@
 <template>
-  
   <div>
-    <div class="z-1 p-6 flex flex-wrap justify-start">
-      <div class="m-2" v-for="app in appList.filter(i => !(i.isHideInList))" :key="app.appName">
+    <div class="z-1 p-1.5 flex flex-wrap justify-start">
+      <div class="m-1" v-for="app in appList.filter(i => !(i.isHideInList))" :key="app.appName">
         <div
-          class="rounded-lg h-8 w-24 flex items-center justify-center bg-green-400 cursor-pointer mb-0.5 relative overflow-hidden"
+          class="rounded-sm h-7 w-24 flex items-center justify-center bg-green-500 cursor-pointer mb-0.5 relative overflow-hidden"
           @click="useLaunchApp(app)"
           @contextmenu="useShowAppContextMenu(app.appName)"
         >
           <div
             v-if="backgroundAppNames.includes(app.appName)"
-            class="absolute bg-green-600 animate-pulse h-1 w-full bottom-0"
+            class="absolute bg-green-700 animate-pulse h-1 w-full bottom-0"
           ></div>
-          <div class="text-white text-center tracking-widest w-full">
+          <div class="text-white text-sm text-center tracking-widest w-full">
             {{ app.appNick ? app.appNick.substr(0) : app.appName }}
             <!-- {{ app.appNick ? app.appNick.substr(0,2) : app.appName }} -->
           </div>

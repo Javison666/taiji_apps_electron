@@ -33,7 +33,7 @@ export default () => {
         if (route.query.status === 'edit' &&
             typeof route.query.name === 'string') {
             isNewPage.value = false
-            lowcodeApp.value = await client.ipcRenderer.invoke('client:getTTcodeTask', route.query.name)
+            lowcodeApp.value = await client.ipcRenderer.invoke('client:getTTcodeTaskByName', route.query.name)
         }
     }
 
@@ -56,8 +56,6 @@ export default () => {
             value: ''
         }
         lowcodeApp.value.steps.splice(idx, 0, newStep)
-        // lowcodeApp.value.steps.push(newStep)
-        // console.log(lowcodeApp)
     }
 
     // 删除步骤
@@ -67,9 +65,8 @@ export default () => {
 
     // 保存配置
     const saveLowcodeApp = async () => {
-        console.log(lowcodeApp.value)
         if(isNewPage){
-            let isExisted = await client.ipcRenderer.invoke('client:isTTcodeTaskFileExisted', lowcodeApp.value.name)
+            let isExisted = await client.ipcRenderer.invoke('client:isTTcodeTaskFileExistedByName', lowcodeApp.value.name)
             if(isExisted){
                 return client.ipcRenderer.showErrorBox("添加应用失败", "应用名称已存在");
             }
@@ -78,6 +75,10 @@ export default () => {
         router.push({
             path: '/localTasks/list'
         })
+    }
+
+    const delTTcodeTaskByName = async (name: string) => {
+
     }
 
     const runTTcodeTaskByName = async (name: string) => {

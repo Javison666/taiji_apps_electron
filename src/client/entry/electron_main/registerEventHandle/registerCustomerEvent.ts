@@ -5,8 +5,6 @@ import { AppItemName, IAppConfiguraiton, IAppType } from 'client/workbench/proto
 import { runApp } from 'client/workbench/apps/index'
 import path = require('path')
 import Background from 'client/entry/electron_main/background'
-import { ITaskConf } from 'client/workbench/apps/ttcode/lib/TTcodeService'
-import TTcode from 'client/workbench/apps/ttcode/electron-main'
 import DownloadService, { downloadCb, downloadProcessMap } from 'client/workbench/services/downloadService'
 
 
@@ -204,40 +202,6 @@ export default () => {
 				]
 			}
 		})
-	})
-
-	// ttcode模块
-	ipcMain.handle('client:runTTcodeTaskByName', async (event, name: string) => {
-		const ttcodeTaskConf = TTcode.INSTANCE.getTTcodeTask(name)
-		await TTcode.INSTANCE.main(ttcodeTaskConf)
-		return
-	})
-
-	ipcMain.handle('client:getTTcodeAppList', async () => {
-		return TTcode.INSTANCE.getTTcodeAppList()
-	})
-
-
-	ipcMain.handle('client:getTTcodeTask', async (event, name: string) => {
-		return TTcode.INSTANCE.getTTcodeTask(name)
-	})
-
-	ipcMain.handle('client:stopTTcodeTask', async (event, name: string) => {
-		let winItem = TTcode.INSTANCE.getTTWinItem(name)
-		if (winItem) {
-			winItem.win.destroy()
-			TTcode.INSTANCE.clearTTWinItem(name)
-		}
-		return
-	})
-
-	ipcMain.handle('client:isTTcodeTaskFileExisted', async (event, name) => {
-		return TTcode.INSTANCE.isTTcodeTaskFileExisted(name)
-	})
-
-	ipcMain.handle('client:saveLowcodeApp', async (event, ttcodeTaskConf: ITaskConf) => {
-		TTcode.INSTANCE.saveLowcodeApp(ttcodeTaskConf)
-		return
 	})
 }
 

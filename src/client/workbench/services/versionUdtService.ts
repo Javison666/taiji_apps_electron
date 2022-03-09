@@ -4,13 +4,8 @@ import Logger from 'client/platform/environment/node/logger'
 import { AppItemName } from 'client/workbench/protocals/commonProtocal'
 import VersionDecoder from 'client/workbench/utils/versionDecoder'
 import { getVersionCommon } from 'client/base/common/network'
-import * as path from 'path'
 import { IVersionInfoData, VersionUdtChannelCommand } from 'client/workbench/protocals/versionUdtServiceProtocal';
-import * as ini from 'ini'
-import fs = require('fs')
 import { spawn } from 'child_process';
-import { AppPackageName } from 'client/env';
-const fsExtra = require('fs-extra')
 
 interface IVersionCheckData {
 	// 新增优化功能
@@ -28,14 +23,6 @@ interface IVersionCheckData {
 	// 屏蔽版本号集
 	// blackVersions: string[]
 }
-
-interface IVersionIni {
-	common: {
-		ver: string
-	}
-}
-
-export const isCurrentVersionPkg = fsExtra.pathExistsSync(path.join(process.cwd(), '../../', `${AppPackageName}.exe`)) && fsExtra.pathExistsSync(path.join(process.cwd(), '../../', `versions`))
 
 // 主要功能在shareProcess中运行
 class VersionUdtService {
@@ -68,22 +55,6 @@ class VersionUdtService {
 		}
 	}
 
-	get rootDir() {
-		if (isCurrentVersionPkg) {
-			return path.join(process.cwd(), '../../')
-		} else {
-			return path.join(process.cwd())
-		}
-	}
-
-	get versionDir() {
-		if (isCurrentVersionPkg) {
-			return path.join(process.cwd(), '../../', 'versions')
-		} else {
-			return path.join(process.cwd(), 'versions')
-		}
-	}
-
 	public get newVersionInfo() {
 		return {
 			newVersionAvailable: VersionUdtService.INSTANCE._newVersionAvailable,
@@ -92,6 +63,7 @@ class VersionUdtService {
 		}
 	}
 
+	// 备注：ecess错误为需要管理员模式
 	public async updateClient() {
 		try {
 			if (!this.newVersionInfo.newVersionDetails.clientUrl) {
@@ -99,8 +71,6 @@ class VersionUdtService {
 			}
 			Logger.INSTANCE.info('start download', VersionUdtService.INSTANCE.newVersionInfo)
 			let versionUrl = VersionUdtService.INSTANCE.newVersionInfo.newVersionDetails.clientUrl
-			// let versionNo = VersionUdtService.INSTANCE.newVersionInfo.newVersionDetails.versionNo
-			await fsExtra.mkdirp(VersionUdtService.INSTANCE.versionDir)
 			// 下载新版本包
 			const downloadPath = await ipcRenderer.invoke('client:downloadFile', {
 				appName: AppItemName.Sys_Udt_App,
@@ -151,22 +121,6 @@ class VersionUdtService {
 			}, 600000)
 		} catch (err) {
 			Logger.INSTANCE.error('loopCheckUdt error', err)
-		}
-	}
-
-	// 切换为版本号启动模式，因为目前稳定，所以暂时不启用
-	async udtVersionIni(versionNo: string) {
-		try {
-			const iniData: IVersionIni = {
-				common: {
-					ver: versionNo
-				}
-			}
-			fs.writeFileSync(path.join(VersionUdtService.INSTANCE.versionDir, 'version.ini'), ini.stringify(iniData), {
-				encoding: 'utf-8'
-			})
-		} catch (err) {
-			Logger.INSTANCE.error('udtVersionIni', err)
 		}
 	}
 }

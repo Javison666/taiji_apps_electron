@@ -55,7 +55,7 @@
       <div class="j-button text-xs mb-1" @click="addLowcodeStep(lowcodeApp.steps.length)">
         添加步骤
       </div>
-      <div class="j-button text-sm mt-4 text-center" @click="saveLowcodeApp">
+      <div class="j-button text-sm mt-4 text-center text-white bg-green-600" @click="saveLowcodeApp">
         保存
       </div>
     </div>

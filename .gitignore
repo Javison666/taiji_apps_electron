@@ -8,7 +8,6 @@ dist_pre
 user_data
 logs
 yarn-error.log
-versions
 cache
 data
 .vscode

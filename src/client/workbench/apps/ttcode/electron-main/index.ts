@@ -3,7 +3,7 @@ import { fileFromClientResource, fileFromUserDataCommon } from 'client/base/comm
 import { AppItemName } from 'client/workbench/protocals/commonProtocal'
 import TTCodeService, { ITaskConf } from 'client/workbench/apps/ttcode/lib/TTcodeService'
 import path = require('path')
-import fs = require('fs')
+import fs = require('fs-extra')
 import { env, EnvType } from 'client/env'
 import { app, BrowserWindow } from 'electron'
 
@@ -41,8 +41,13 @@ class TTcode {
 		return TTcodeTaskMap.delete(name)
 	}
 
-	public getTTcodeTask(name: string) {
-		return TTCodeService.INSTANCE.decodeTTFileSync(path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
+	public getTTcodeTaskByName(name: string) {
+		try {
+			return TTCodeService.INSTANCE.decodeTTFileSync(path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
+		} catch (err) {
+			Logger.INSTANCE.error('getTTcodeTask err:', err);
+		}
+		return
 	}
 
 	public isTTcodeTaskFileExisted(name: string) {
@@ -57,14 +62,44 @@ class TTcode {
 	}
 
 	public getTTcodeAppList() {
-		const list = fs.readdirSync(TTcode.INSTANCE.dataPath)
-		Logger.INSTANCE.info('getTTcodeAppList', list)
-		return list.filter(i => i.endsWith('.tt')).map(i => i.substr(0, i.length - 3))
+		try {
+			const list = fs.readdirSync(TTcode.INSTANCE.dataPath)
+			return list.filter(i => i.endsWith('.tt')).map(i => i.substr(0, i.length - 3))
+		} catch (err) {
+			Logger.INSTANCE.error('getTTcodeAppList err:', err);
+		}
+		return
 	}
 
 	public saveLowcodeApp(ttcodeTaskConf: ITaskConf) {
-		const name = ttcodeTaskConf.name
-		TTCodeService.INSTANCE.encodeTTFileSync(ttcodeTaskConf, path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
+		try {
+			const name = ttcodeTaskConf.name
+			TTCodeService.INSTANCE.encodeTTFileSync(ttcodeTaskConf, path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
+		} catch (err) {
+			Logger.INSTANCE.error('saveLowcodeApp err:', err);
+		}
+	}
+
+	public stopTTcodeTaskByName(name: string) {
+		try {
+			let winItem = TTcode.INSTANCE.getTTWinItem(name)
+			if (winItem) {
+				winItem.win.destroy()
+				TTcode.INSTANCE.clearTTWinItem(name)
+			}
+		} catch (err) {
+			Logger.INSTANCE.error('stopTTcodeTaskByName err:', err);
+		}
+		return
+	}
+
+	public delLowcodeAppByName(name: string) {
+		try {
+			TTcode.INSTANCE.stopTTcodeTaskByName(name)
+			fs.rmSync(path.join(TTcode.INSTANCE.dataPath, `${name}.tt`))
+		} catch (err) {
+			Logger.INSTANCE.error('saveLowcodeApp err:', err);
+		}
 	}
 
 	private async createWindow(ttcodeTaskConf: ITaskConf) {
