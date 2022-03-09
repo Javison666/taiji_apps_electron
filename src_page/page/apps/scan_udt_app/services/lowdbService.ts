@@ -10,7 +10,7 @@ import { lowdb as low, path } from 'src_page/page/utils/common'
 
 const FileSync = client.app.require('lowdb/adapters/FileSync')
 
-const dbPath = path.join(client.app.userDataPath, './storage/scan_udt_app.db')
+const dbPath = path.join(client.app.userDataPath, './backdata/storage/scan_udt_app.db')
 
 const adapter = new FileSync(dbPath)
 const db = low(adapter)

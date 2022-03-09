@@ -3,7 +3,6 @@ import Logger from 'client/platform/environment/node/logger'
 import { ClientApplication } from './app'
 import { byteSizeUnit } from 'client/workbench/utils/calc'
 import os = require('os')
-import path = require('path')
 import fs = require('fs-extra')
 import { fileFromUserDataCommon } from 'client/base/common/network';
 
@@ -15,8 +14,8 @@ class EntryMainProcess {
 		try {
 			Logger.INSTANCE.init('main')
 			try {
-				fs.mkdirp(fileFromUserDataCommon('./storage'))
-				fs.mkdirp(path.join(process.cwd(), 'data/ttcode'))
+				fs.mkdirpSync(fileFromUserDataCommon('./backdata/storage'))
+				fs.mkdirpSync(fileFromUserDataCommon('./backdata/ttcode'))
 			} catch (err) {
 				Logger.INSTANCE.local('EntryMainProcess main:', err)
 			}

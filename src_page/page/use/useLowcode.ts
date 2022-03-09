@@ -30,6 +30,7 @@ export default () => {
     // 初始化leetcode编辑页面
     const initLowcodeApp = async () => {
         lowcodeApp.value = defaultApp
+        isNewPage.value = true
         if (route.query.status === 'edit' &&
             typeof route.query.name === 'string') {
             isNewPage.value = false
@@ -65,7 +66,7 @@ export default () => {
 
     // 保存配置
     const saveLowcodeApp = async () => {
-        if(isNewPage){
+        if(isNewPage.value){
             let isExisted = await client.ipcRenderer.invoke('client:isTTcodeTaskFileExistedByName', lowcodeApp.value.name)
             if(isExisted){
                 return client.ipcRenderer.showErrorBox("添加应用失败", "应用名称已存在");

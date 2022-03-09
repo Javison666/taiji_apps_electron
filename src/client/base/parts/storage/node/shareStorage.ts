@@ -16,7 +16,7 @@ class ShareStorage {
 
 	private async startup(): Promise<void> {
 
-		let dbPath = fileFromUserDataCommon('./storage/share_storage.db')
+		let dbPath = fileFromUserDataCommon('./backdata/storage/share_storage.db')
 		fileCreateIfNotExisted(dbPath)
 		this._db = new sqlite3.Database(dbPath)
 	}

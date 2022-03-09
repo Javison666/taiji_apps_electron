@@ -17,7 +17,7 @@ export const TTcodeTaskMap: Map<string, ITTWinMap> = new Map()
 class TTcode {
 
 	public static readonly INSTANCE = new TTcode()
-	public readonly dataPath = path.join(process.cwd(), './data/ttcode')
+	public readonly dataPath = fileFromUserDataCommon('./backdata/ttcode')
 
 	async main(ttcodeTaskConf: ITaskConf): Promise<void> {
 		try {
@@ -55,7 +55,7 @@ class TTcode {
 		try {
 			fs.accessSync(path.join(TTcode.INSTANCE.dataPath, `${name}.tt`), fs.constants.F_OK)
 		} catch (err) {
-			Logger.INSTANCE.info('isTTcodeTaskFileExisted err:', err)
+			Logger.INSTANCE.local('isTTcodeTaskFileExisted err:', err)
 			isExisted = false
 		}
 		return isExisted

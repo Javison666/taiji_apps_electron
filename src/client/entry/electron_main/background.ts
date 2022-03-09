@@ -25,7 +25,7 @@ class Background {
 			Background.INSTANCE._isRunning = true
 		}
 
-		const dbPath = fileFromUserDataCommon('./storage/main.db')
+		const dbPath = fileFromUserDataCommon('./backdata/storage/main.db')
 		const adapter = new FileSync(dbPath)
 		this._db = low(adapter)
 		this._db.defaults({
