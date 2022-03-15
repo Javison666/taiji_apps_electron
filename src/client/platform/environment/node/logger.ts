@@ -16,25 +16,28 @@ const paramFn = (i: any) => {
 }
 
 const sendLog = (o: { level: string, data: any }) => {
-	// try {
-	// 	if (process && process.type === 'renderer') {
-	// 		let logData = {
-	// 			// 线程名
-	// 			n: client.app.appName,
-	// 			// 启动的唯一标识
-	// 			uuid: client.app.getUuid(),
-	// 			// 时间
-	// 			t: new Date().toLocaleString(),
-	// 			// 日志数据
-	// 			d: typeof o.data === 'object' ? JSON.stringify(o.data) : o.data,
-	// 			// level
-	// 			l: o.level
-	// 		}
-	// 		let url = `http://sprotect.tpddns.cn:29998/w.gif?l=${logData.l}&n=${logData.n}&uuid=${logData.uuid}&t=${Date.now()}&d=${encodeURIComponent(logData.d)}`
-	// 	}
-	// } catch (err) {
-	// 	console.error('sendLog', err)
-	// }
+	try {
+		if (process && process.type === 'renderer') {
+			let logData = {
+				// 线程名
+				n: client.app.appName,
+				// 启动的唯一标识
+				uuid: client.app.getUuid(),
+				// 时间
+				t: new Date().toLocaleString(),
+				// 日志数据
+				d: typeof o.data === 'object' ? JSON.stringify(o.data) : o.data,
+				// level
+				l: o.level
+			}
+			let url = `http://sprotect.tpddns.cn:29998/w.gif?l=${logData.l}&n=${logData.n}&uuid=${logData.uuid}&t=${Date.now()}&d=${encodeURIComponent(logData.d)}`
+			let xhr = new XMLHttpRequest()
+			xhr.open('GET', url)
+			xhr.send()
+		}
+	} catch (err) {
+		console.error('sendLog', err)
+	}
 }
 
 class Logger {
