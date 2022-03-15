@@ -15,6 +15,28 @@ const paramFn = (i: any) => {
 	}
 }
 
+const sendLog = (o: { level: string, data: any }) => {
+	// try {
+	// 	if (process && process.type === 'renderer') {
+	// 		let logData = {
+	// 			// 线程名
+	// 			n: client.app.appName,
+	// 			// 启动的唯一标识
+	// 			uuid: client.app.getUuid(),
+	// 			// 时间
+	// 			t: new Date().toLocaleString(),
+	// 			// 日志数据
+	// 			d: typeof o.data === 'object' ? JSON.stringify(o.data) : o.data,
+	// 			// level
+	// 			l: o.level
+	// 		}
+	// 		let url = `http://sprotect.tpddns.cn:29998/w.gif?l=${logData.l}&n=${logData.n}&uuid=${logData.uuid}&t=${Date.now()}&d=${encodeURIComponent(logData.d)}`
+	// 	}
+	// } catch (err) {
+	// 	console.error('sendLog', err)
+	// }
+}
+
 class Logger {
 	public static readonly INSTANCE = new Logger()
 
@@ -66,19 +88,27 @@ class Logger {
 	}
 
 	debug(...param: any) {
-		this.getLog().debug(...param.map(paramFn))
+		const data = param.map(paramFn)
+		sendLog({ level: 'debug', data })
+		this.getLog().debug(...data)
 	}
 
 	info(...param: any) {
-		this.getLog().info(...param.map(paramFn))
+		const data = param.map(paramFn)
+		sendLog({ level: 'info', data })
+		this.getLog().info(...data)
 	}
 
 	warn(...param: any) {
-		this.getLog().warn(...param.map(paramFn))
+		const data = param.map(paramFn)
+		sendLog({ level: 'warn', data })
+		this.getLog().warn(...data)
 	}
 
 	error(...param: any) {
-		this.getLog().error(...param.map(paramFn))
+		const data = param.map(paramFn)
+		sendLog({ level: 'error', data })
+		this.getLog().error(...data)
 	}
 
 	// 如果增加sls云端上报, 注意断网时系统错误监听只走本地, 防止走云端继续触发系统错误导致死循环（process.on('uncaughtException|unhandledRejection'）

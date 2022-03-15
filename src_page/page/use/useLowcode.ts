@@ -4,21 +4,21 @@ import { ILowcodeApp, StepTypeCode } from 'src_page/page/types/defineLowcode'
 
 
 
-const defaultApp = {
+const getDefaultApp = () => ({
     name: '',
     steps: [{
         stepType: StepTypeCode.cmd,
         remark: '',
         value: ''
     }]
-}
+})
 
 export default () => {
 
     const route = useRoute()
     const router = useRouter()
 
-    let lowcodeApp = ref(<ILowcodeApp>defaultApp)
+    let lowcodeApp = ref(<ILowcodeApp>getDefaultApp())
     let ttcodeAppList = ref(<string[]>[])
     let isNewPage = ref(true)
 
@@ -29,7 +29,7 @@ export default () => {
 
     // 初始化leetcode编辑页面
     const initLowcodeApp = async () => {
-        lowcodeApp.value = defaultApp
+        lowcodeApp.value = getDefaultApp()
         isNewPage.value = true
         if (route.query.status === 'edit' &&
             typeof route.query.name === 'string') {
@@ -40,7 +40,7 @@ export default () => {
 
 
     const clearLowcodeApp = async () => {
-        lowcodeApp.value = defaultApp
+        lowcodeApp.value = getDefaultApp()
         if (
             route.query.status === 'edit' &&
             typeof route.query.name === 'string'
