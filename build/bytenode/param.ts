@@ -1,9 +1,7 @@
 // 加密操作
 export const outSrcDir = 'out_client'
 export const bytenodeFiles = [
-	`${outSrcDir}/client/base/browser`,
 	`${outSrcDir}/client/base/common`,
-	`${outSrcDir}/client/base/electron`,
 	`${outSrcDir}/client/base/node`,
 	`${outSrcDir}/client/base/parts/storage`,
 	`${outSrcDir}/client/common`,

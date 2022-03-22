@@ -4,9 +4,7 @@ exports.bytenodeFiles = exports.outSrcDir = void 0;
 // 加密操作
 exports.outSrcDir = 'out_client';
 exports.bytenodeFiles = [
-    `${exports.outSrcDir}/client/base/browser`,
     `${exports.outSrcDir}/client/base/common`,
-    `${exports.outSrcDir}/client/base/electron`,
     `${exports.outSrcDir}/client/base/node`,
     `${exports.outSrcDir}/client/base/parts/storage`,
     `${exports.outSrcDir}/client/common`,

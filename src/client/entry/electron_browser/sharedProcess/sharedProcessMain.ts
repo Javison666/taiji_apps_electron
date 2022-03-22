@@ -14,14 +14,12 @@ import BizShareProcess from 'client/workbench/apps/bizShareProcess'
 class SharedProcessMain {
 	async open(): Promise<void> {
 		this.registerListeners()
-		// Services
 		await this.initServices();
 	}
 
 	private async initServices(): Promise<void> {
 		await StaticPageResourceServer.INSTANCE.main()
 		await ShareStorage.INSTANCE.main()
-		// 该服务暂时在share与主线程同时运行
 		await UtilService.INSTANCE.main()
 		await FileHistoryService.INSTANCE.main()
 		await itemStorageService.INSTANCE.main()
