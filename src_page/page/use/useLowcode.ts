@@ -4,7 +4,7 @@ import { ILowcodeApp, StepTypeCode } from 'src_page/page/types/defineLowcode'
 
 
 
-const getDefaultApp = () => ({http://120.26.87.127:8361
+const getDefaultApp = () => ({
     name: '',
     steps: [{
         stepType: StepTypeCode.cmd,

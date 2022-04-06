@@ -6,7 +6,7 @@ client.ipcRenderer.showMessageBox
 <!-- 弹窗提示 -->
 let res: Boolean = await client.ipcRenderer.invoke(
 "client:showHandleWindow",
-`确认删除通知渠道(${channelName})吗?`
+`确认删除吗?`
 );
 
 client.ipcRenderer.invoke('client:launchApp', <IAppConfiguraiton>appConf);
