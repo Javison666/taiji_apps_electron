@@ -25,6 +25,10 @@ export function stopLightCodeTaskByName(name: string) {
 	}
 }
 
+setTimeout(() => {
+
+}, 5000)
+
 export const lightCodehandleChannelTask = async (appName: AppItemName, channelData: { channelCommand: string, reqData: any }) => {
 	switch (channelData.channelCommand) {
 		case LightCodeChannelCommand.subCommand.runTTcodeTaskByName:
@@ -57,4 +61,12 @@ export const lightCodehandleChannelTask = async (appName: AppItemName, channelDa
 			break
 	}
 	return null
+}
+
+
+class LightCodeWorker {
+	private static readonly _path = '.js'
+	constructor() { }
+
+
 }
