@@ -34,13 +34,13 @@ export interface ITaskConf {
     steps: ITaskStep[]
 }
 
-class TTCodeService {
-    public static readonly INSTANCE = new TTCodeService()
+class LightCodeService {
+    public static readonly INSTANCE = new LightCodeService()
     constructor() { }
 
     runTTFileSync(uri: string) {
-        const taskConf = TTCodeService.INSTANCE.decodeTTFileSync(uri)
-        TTCodeService.INSTANCE.runTaskConfSync(taskConf)
+        const taskConf = LightCodeService.INSTANCE.decodeTTFileSync(uri)
+        LightCodeService.INSTANCE.runTaskConfSync(taskConf)
     }
 
     runTaskConfSync(taskConf: ITaskConf) {
@@ -83,8 +83,8 @@ class TTCodeService {
     }
 
     decodeTTConfStr(str: string) {
-        let taskConf = TTCodeService.createEmptyTaskConf()
-        let taskStep = TTCodeService.createEmptyTaskStep()
+        let taskConf = LightCodeService.createEmptyTaskConf()
+        let taskStep = LightCodeService.createEmptyTaskStep()
         let pt = 0, len = str.length
         let _line = ''
         while (pt < len) {
@@ -113,7 +113,7 @@ class TTCodeService {
                     if (taskStep.stepType) {
                         taskConf.steps.push(taskStep)
                     }
-                    taskStep = TTCodeService.createEmptyTaskStep()
+                    taskStep = LightCodeService.createEmptyTaskStep()
                     taskStep.stepType = <StepTypeCode>_line.trim()
                     break
                 case '++':
@@ -148,7 +148,7 @@ class TTCodeService {
         const str = fs.readFileSync(uri, {
             encoding: 'utf8'
         })
-        return TTCodeService.INSTANCE.decodeTTConfStr(str)
+        return LightCodeService.INSTANCE.decodeTTConfStr(str)
     }
 
     encodeTTConfToStr(taskConf: ITaskConf) {
@@ -179,13 +179,13 @@ class TTCodeService {
     }
 
     encodeTTFileSync(taskConf: ITaskConf, uri: string) {
-        let str = TTCodeService.INSTANCE.encodeTTConfToStr(taskConf)
+        let str = LightCodeService.INSTANCE.encodeTTConfToStr(taskConf)
         fs.writeFileSync(uri, str)
         return str
     }
 }
 
-export default TTCodeService
+export default LightCodeService
 
 
 // const testTask: ITaskConf = {

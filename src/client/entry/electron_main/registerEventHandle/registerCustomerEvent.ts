@@ -7,7 +7,6 @@ import path = require('path')
 import Background from 'client/entry/electron_main/background'
 import DownloadService, { downloadCb, downloadProcessMap } from 'client/workbench/services/downloadService'
 
-
 export default () => {
 
 	ipcMain.on('client:cancelDownloadItem', async (event, url: string) => {

@@ -250,6 +250,7 @@ export const fileFromUserDataCommon = (filePath: string) => {
 
 }
 
+// 若不存在，直接创建空白文件
 export const fileCreateIfNotExisted = (filePath: string) => {
 	if (!fs.existsSync(filePath)) {
 		let dir = path.join(filePath, '../')
@@ -258,7 +259,6 @@ export const fileCreateIfNotExisted = (filePath: string) => {
 		}
 		fs.openSync(filePath, 'w');
 	};
-
 }
 
 export const getAppDataDirPath = () => ipcRenderer.invoke('client:getAppDataDirPath')

@@ -10,6 +10,8 @@ import { FileHistoryChannelCommand } from 'client/workbench/protocals/fileHistor
 import { ItemStorageChannelCommand } from 'client/workbench/protocals/itemStorageProtocal'
 import { VersionUdtChannelCommand } from 'client/workbench/protocals/versionUdtServiceProtocal'
 import VersionUdtService from 'client/workbench/services/versionUdtService'
+import { LightCodeChannelCommand } from 'client/workbench/protocals/lightCodeServiceProtocal'
+import { lightCodehandleChannelTask } from 'client/workbench/services/lightCodeService/lightCodeHandle'
 
 class BizShareProcess {
 	public static INSTANCE = new BizShareProcess()
@@ -31,6 +33,8 @@ class BizShareProcess {
 						return await ItemStorageService.INSTANCE.handleTask(fromAppName, reqData)
 					case VersionUdtChannelCommand.mainCommand:
 						return await VersionUdtService.INSTANCE.handleTask(fromAppName, reqData)
+					case LightCodeChannelCommand.mainCommand:
+						return await lightCodehandleChannelTask(fromAppName, reqData)
 					default:
 						break
 				}

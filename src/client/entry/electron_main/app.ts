@@ -8,7 +8,7 @@ import { fileFromPublicResource } from 'client/base/common/network'
 import DashBench from 'client/workbench/main/dashBench/electron-main'
 import registerCommonEvent from 'client/entry/electron_main/registerEventHandle/registerCommonEvent'
 import registerCustomerEvent from 'client/entry/electron_main/registerEventHandle/registerCustomerEvent'
-import registerTTcodeEvent from 'client/entry/electron_main/registerEventHandle/registerTTcodeEvent'
+
 /**
  * The main client application. There will only ever be one instance,
  * even if the user starts many instances (e.g. from the command line).
@@ -124,7 +124,6 @@ export class ClientApplication {
 
 		registerCommonEvent()
 		registerCustomerEvent()
-		registerTTcodeEvent()
 
 		Logger.INSTANCE.info('ClientApplication registerListeners success!');
 	}
