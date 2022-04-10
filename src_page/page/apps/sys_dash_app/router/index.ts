@@ -4,7 +4,7 @@ import mainBench from '../pages/mainBench.vue'
 import localTasks from '../pages/localTasks/index.vue'
 import localTasksList from '../pages/localTasks/localTasks.vue'
 import specialApps from '../pages/specialApps.vue'
-import lowcode from '../pages/localTasks/lowcode/index.vue'
+import lightCode from '../pages/localTasks/lightCode/index.vue'
 
 const routes = [
 	{
@@ -13,7 +13,7 @@ const routes = [
 		children: [{
 			path: '/',
 			redirect: '/localTasks'
-		},{
+		}, {
 			path: '/localTasks',
 			component: localTasks,
 			children: [{
@@ -23,15 +23,15 @@ const routes = [
 				path: '/localTasks/list',
 				component: localTasksList
 			}, {
-				path: '/localTasks/lowcode',
-				component: lowcode
+				path: '/localTasks/lightCode',
+				component: lightCode
 			}],
-		},{
+		}, {
 			path: '/specialApps',
 			component: specialApps
-		},{
-			path: '/lowcode',
-			component: lowcode
+		}, {
+			path: '/lightCode',
+			component: lightCode
 		}]
 	}
 ]

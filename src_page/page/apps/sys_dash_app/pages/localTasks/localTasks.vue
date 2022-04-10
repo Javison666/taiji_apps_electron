@@ -1,7 +1,7 @@
 <template>
   <div class="p-2 pt-0 w-full h-full">
     <div class="mb-1">
-      <router-link to="/localTasks/lowcode?status=new">
+      <router-link to="/localTasks/lightCode?status=new">
         <div class="j-button text-xs">
           新增
         </div>
@@ -10,13 +10,13 @@
     <div>
       <div
         class="bg-green-700 text-white cursor-pointer flex text-xs p-1.5 mt-0.5"
-        v-for="(item, idx) in ttcodeAppList"
+        v-for="(item, idx) in lightCodeAppList"
         :key="idx"
       >
         <span class="flex-grow text-left">{{ item }}</span>
-        <a href="#" class="mr-2" @click.prevent="runTTcodeTaskByName(item)">运行</a>
-        <router-link :to="'/localTasks/lowcode?status=edit&name=' + item" class="mr-2">修改</router-link>
-        <a href="#" @click.prevent="delTTcode(item)">删除</a>
+        <a href="#" class="mr-2" @click.prevent="runLightCodeTaskByName(item)">运行</a>
+        <router-link :to="'/localTasks/lightCode?status=edit&name=' + item" class="mr-2">修改</router-link>
+        <a href="#" @click.prevent="dellightCode(item)">删除</a>
       </div>
     </div>
   </div>
@@ -24,30 +24,30 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import useLowcode from "src_page/page/use/useLowcode";
+import useLowcode from "src_page/page/use/useLightCode";
 
 export default defineComponent({
   name: "localTask",
   setup() {
     const {
-      initTTcodeList,
-      ttcodeAppList,
-      runTTcodeTaskByName,
-      delTTcodeTaskByName
+      initLightCodeList,
+      lightCodeAppList,
+      runLightCodeTaskByName,
+      delLightCodeTaskByName
     } = useLowcode();
 
-    const delTTcode = async (name: string) => {
-      await delTTcodeTaskByName(name)
-      initTTcodeList()
+    const dellightCode = async (name: string) => {
+      await delLightCodeTaskByName(name)
+      initLightCodeList()
     }
 
-    initTTcodeList();
+    initLightCodeList();
 
     return {
-      ttcodeAppList,
-      initTTcodeList,
-      runTTcodeTaskByName,
-      delTTcode
+      lightCodeAppList,
+      initLightCodeList,
+      runLightCodeTaskByName,
+      dellightCode
     };
   },
 });

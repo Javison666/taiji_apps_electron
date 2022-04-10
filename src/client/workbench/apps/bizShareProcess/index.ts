@@ -11,7 +11,7 @@ import { ItemStorageChannelCommand } from 'client/workbench/protocals/itemStorag
 import { VersionUdtChannelCommand } from 'client/workbench/protocals/versionUdtServiceProtocal'
 import VersionUdtService from 'client/workbench/services/versionUdtService'
 import { LightCodeChannelCommand } from 'client/workbench/protocals/lightCodeServiceProtocal'
-import { lightCodehandleChannelTask } from 'client/workbench/services/lightCodeService/lightCodeHandle'
+import { lightCodehandleChannelTask } from 'client/workbench/apps/bizShareProcess/lightCodeHandle'
 
 class BizShareProcess {
 	public static INSTANCE = new BizShareProcess()

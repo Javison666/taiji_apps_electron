@@ -9,15 +9,15 @@
     </div>
     <div class="mb-2 flex text-xs">
       <div>
-        应用名：<input class="border-2" v-model="lowcodeApp.name" />
+        应用名：<input class="border-2" v-model="lightCodeApp.name" />
       </div>
       <!-- <div>
-        分组：<input class="border-2" :value="lowcodeApp.name" />
+        分组：<input class="border-2" :value="lightCodeApp.name" />
       </div> -->
     </div>
     <div>
-      <div class="mb-2" v-for="(step, idx) in lowcodeApp.steps" :key="idx">
-        <div class="j-button text-xs mb-1 opacity-80" @click="addLowcodeStep(idx)">
+      <div class="mb-2" v-for="(step, idx) in lightCodeApp.steps" :key="idx">
+        <div class="j-button text-xs mb-1 opacity-80" @click="addLightCodeStep(idx)">
           添加步骤
         </div>
         <div class="border-2 border-b-0 text-sm pl-1">
@@ -46,16 +46,16 @@
         <div class="text-right">
           <div
             class="j-button-error text-xs inline-block"
-            @click="delLowcodeStep(idx)"
+            @click="delLightCodeStep(idx)"
           >
             删除步骤
           </div>
         </div>
       </div>
-      <div class="j-button text-xs mb-1 opacity-80" @click="addLowcodeStep(lowcodeApp.steps.length)">
+      <div class="j-button text-xs mb-1 opacity-80" @click="addLightCodeStep(lightCodeApp.steps.length)">
         添加步骤
       </div>
-      <div class="j-button text-sm mt-4 text-center text-white bg-green-600" @click="saveLowcodeApp">
+      <div class="j-button text-sm mt-4 text-center text-white bg-green-600" @click="saveLightCodeApp">
         保存
       </div>
     </div>
@@ -64,30 +64,30 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import useLowcode from "src_page/page/use/useLowcode";
-import { StepTypeCode } from "src_page/page/types/defineLowcode";
+import useLightCode from "src_page/page/use/useLightCode";
+import { StepTypeCode } from "src/client/workbench/protocals/lightCodeServiceProtocal";
 
 export default defineComponent({
   name: "lowcode",
   setup() {
     const {
-      initLowcodeApp,
+      initLightCodeApp,
       isNewPage,
-      lowcodeApp,
-      addLowcodeStep,
-      delLowcodeStep,
-      saveLowcodeApp,
-      clearLowcodeApp,
-    } = useLowcode();
-    initLowcodeApp();
+      lightCodeApp,
+      addLightCodeStep,
+      delLightCodeStep,
+      saveLightCodeApp,
+      clearLightCodeApp,
+    } = useLightCode();
+    initLightCodeApp();
     return {
       isNewPage,
-      lowcodeApp,
+      lightCodeApp,
       StepTypeCode,
-      addLowcodeStep,
-      delLowcodeStep,
-      clearLowcodeApp,
-      saveLowcodeApp,
+      addLightCodeStep,
+      delLightCodeStep,
+      clearLightCodeApp,
+      saveLightCodeApp,
     };
   },
 });

@@ -38,8 +38,8 @@ class LightCodeService {
     public static readonly INSTANCE = new LightCodeService()
     constructor() { }
 
-    runTTFileSync(uri: string) {
-        const taskConf = LightCodeService.INSTANCE.decodeTTFileSync(uri)
+    runLightFileSync(uri: string) {
+        const taskConf = LightCodeService.INSTANCE.decodeLightCodeFileSync(uri)
         LightCodeService.INSTANCE.runTaskConfSync(taskConf)
     }
 
@@ -82,7 +82,7 @@ class LightCodeService {
         }
     }
 
-    decodeTTConfStr(str: string) {
+    decodeLightCodeConfStr(str: string) {
         let taskConf = LightCodeService.createEmptyTaskConf()
         let taskStep = LightCodeService.createEmptyTaskStep()
         let pt = 0, len = str.length
@@ -144,14 +144,14 @@ class LightCodeService {
         return taskConf
     }
 
-    decodeTTFileSync(uri: string) {
+    decodeLightCodeFileSync(uri: string) {
         const str = fs.readFileSync(uri, {
             encoding: 'utf8'
         })
-        return LightCodeService.INSTANCE.decodeTTConfStr(str)
+        return LightCodeService.INSTANCE.decodeLightCodeConfStr(str)
     }
 
-    encodeTTConfToStr(taskConf: ITaskConf) {
+    encodeLightCodeConfToStr(taskConf: ITaskConf) {
         let str = ''
         if (taskConf.name) {
             str += `==${taskConf.name}`
@@ -178,8 +178,8 @@ class LightCodeService {
         return str
     }
 
-    encodeTTFileSync(taskConf: ITaskConf, uri: string) {
-        let str = LightCodeService.INSTANCE.encodeTTConfToStr(taskConf)
+    encodeLightCodeFileSync(taskConf: ITaskConf, uri: string) {
+        let str = LightCodeService.INSTANCE.encodeLightCodeConfToStr(taskConf)
         fs.writeFileSync(uri, str)
         return str
     }
@@ -200,5 +200,5 @@ export default LightCodeService
 //         value: 'code ./page'
 //     }]
 // }
-// TTCodeService.INSTANCE.encodeTTFileSync(testTask, 'E:\\a.tt')
+// TTCodeService.INSTANCE.encodeLightCodeConfToStr(testTask, 'E:\\a.tt')
 // TTCodeService.INSTANCE.runTTFile('E:\\a.tt')

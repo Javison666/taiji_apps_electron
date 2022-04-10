@@ -19,7 +19,7 @@ export function handleBytenodeFiles() {
 			for (let filePath of bytenodeFiles) {
 				let absolutePath = path.join(process.cwd(), filePath)
 				if (isDirectory(filePath)) {
-					const files = getDirSuffixFiles(absolutePath, '.js').map(i => i.replace(process.cwd() + '\\', ''))
+					const files = getDirSuffixFiles(absolutePath, '.js').map(i => i.replace(process.cwd() + '\\', '').replace(process.cwd() + '\/', ''))
 					for (let fileUri of files) {
 						await handleBytenodeFileItem(fileUri)
 					}

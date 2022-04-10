@@ -20,7 +20,7 @@ function handleBytenodeFiles() {
             for (let filePath of param_1.bytenodeFiles) {
                 let absolutePath = path.join(process.cwd(), filePath);
                 if ((0, util_1.isDirectory)(filePath)) {
-                    const files = (0, util_1.getDirSuffixFiles)(absolutePath, '.js').map(i => i.replace(process.cwd() + '\\', ''));
+                    const files = (0, util_1.getDirSuffixFiles)(absolutePath, '.js').map(i => i.replace(process.cwd() + '\\', '').replace(process.cwd() + '\/', ''));
                     for (let fileUri of files) {
                         await handleBytenodeFileItem(fileUri);
                     }
