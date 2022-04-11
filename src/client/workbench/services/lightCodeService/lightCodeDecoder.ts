@@ -6,47 +6,72 @@ import {
 } from 'client/workbench/services/lightCodeService/lightCodeType'
 
 const space = ' '
-const LightCodeFormatError = 'lightcode format wrong 10001'
+const LightCodeFormatError = 'lightcode format wrong '
 
 class LightCodeDecoder {
 	public static readonly INSTANCE = new LightCodeDecoder()
 
+	static getPointAddressFromText(text: string, pt: number) {
+		return text.substring(pt, pt + 8)
+	}
+
+	test() {
+		// test code
+		const fs = require('fs')
+		let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
+		LightCodeDecoder.INSTANCE.decodeCommandText(content.toString())
+	}
+
 	decodeCommandText(text: commandText) {
-		if (!/^[0-9a-f]{8}$/.test(text.slice(0, 8)) || text[8] !== space) {
-			throw new Error(LightCodeFormatError)
-		}
+		let pt = 0, singleCommandLength = LightCodeDecoder.getPointAddressFromText(text, pt)
+		while (/^[0-9a-f]{8}$/.test(singleCommandLength)) {
+			let command_length = parseInt(singleCommandLength, 16), commandStr = ''
+			console.log('command_length', command_length)
+			pt += 8
+			if (text[pt] !== space) {
+				throw new Error(LightCodeFormatError + ' 10001')
+			}
 
-		// let command_length = parseInt(text.slice(0, 8), 16)
-
-		// let lightCodeCommand = {
-		// 	platformType: InstructorPlatformType.Full,
-		// 	categoryType: InstructorCategoryType.System,
-		// 	CommandType: InstructorCommandType.None
-		// }
-
-		let pt = 9, commandStr = ''
-		while (/^[0-9a-f_]$/.test(text[pt])) {
-			commandStr += text[pt]
+			// let lightCodeCommand = {
+			// 	platformType: InstructorPlatformType.Full,
+			// 	categoryType: InstructorCategoryType.System,
+			// 	CommandType: InstructorCommandType.None
+			// }
 			pt++
+			while (/^[0-9a-f_]$/.test(text[pt])) {
+				commandStr += text[pt]
+				pt++
+			}
+			if (text[pt] !== space) {
+				throw new Error(LightCodeFormatError + ' 10002')
+			}
+			pt++
+			let payloadLength = command_length - 10 - commandStr.length
+			if (payloadLength < 0) {
+				throw new Error(LightCodeFormatError + ' 10003')
+			}
+			let payload = text.substring(pt, pt + payloadLength)
+			if (payload.length !== payloadLength) {
+				throw new Error(LightCodeFormatError + ' 10004')
+			}
+			console.log('commandStr:', commandStr, commandStr.length)
+			console.log('payload:', payload, payload.length)
+			pt += payloadLength + 1
+			if (text[pt] !== '\n') {
+				break
+			} else {
+				pt++
+				singleCommandLength = LightCodeDecoder.getPointAddressFromText(text, pt)
+			}
 		}
-
-		if (text[pt] !== space) {
-			throw new Error(LightCodeFormatError)
-		}
-		pt++
-		console.log('commandStr:', commandStr)
-		console.log('payload:', text.slice(pt))
 	}
 
 	decodeConfFile(uri: string) {
 	}
 }
 
-// export default LightCodeDecoder
+export default LightCodeDecoder
 
 
 
-// test code
-const fs = require('fs')
-let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹\\test.lc')
-LightCodeDecoder.INSTANCE.decodeCommandText(content)
+

@@ -6,6 +6,9 @@ import fs = require('fs-extra')
 import path = require('path')
 import LightCodeService, { ITaskConf } from 'client/workbench/services/lightCodeService/lightCodeService'
 import { fileFromUserDataCommon } from 'client/base/common/network'
+import LightCodeDecoder from 'client/workbench/services/lightCodeService/lightCodeDecoder'
+
+LightCodeDecoder.INSTANCE.test()
 
 export const lightCodeDir = fileFromUserDataCommon('./backdata/ttcode')
 
