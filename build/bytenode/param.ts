@@ -12,7 +12,7 @@ export const bytenodeFiles = [
 	`${outSrcDir}/client/workbench/main`,
 	`${outSrcDir}/client/workbench/protocals`,
 	`${outSrcDir}/client/workbench/services`,
-	`${outSrcDir}/client/workbench/workers`,
+	`${outSrcDir}/client/workbench/workers/alias`,
 	`${outSrcDir}/client/workbench/static_resource`,
 	`${outSrcDir}/client/workbench/utils`,
 	`${outSrcDir}/client/workbench/apps/backService/electron-main/backServiceMain.js`,

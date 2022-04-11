@@ -24,17 +24,17 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import useLowcode from "src_page/page/use/useLightCode";
+import useLightCode from "src_page/page/use/useLightCode";
 
 export default defineComponent({
   name: "localTask",
   setup() {
     const {
-      initLightCodeList,
       lightCodeAppList,
+      initLightCodeList,
       runLightCodeTaskByName,
       delLightCodeTaskByName
-    } = useLowcode();
+    } = useLightCode();
 
     const dellightCode = async (name: string) => {
       await delLightCodeTaskByName(name)

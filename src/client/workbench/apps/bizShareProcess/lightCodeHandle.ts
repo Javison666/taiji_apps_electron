@@ -26,7 +26,7 @@ export function stopLightCodeTaskByName(name: string) {
 
 class LightCodeWebWorker {
 	public static readonly INSTANCE = new LightCodeWebWorker()
-	private static readonly _path = '../workers/index/lightCode.js'
+	private static readonly _path = '../../../workbench/workers/index/lightCode.js'
 	constructor() { }
 
 	createWorker(lightConf: ILightCodeApp) {

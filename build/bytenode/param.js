@@ -15,7 +15,7 @@ exports.bytenodeFiles = [
     `${exports.outSrcDir}/client/workbench/main`,
     `${exports.outSrcDir}/client/workbench/protocals`,
     `${exports.outSrcDir}/client/workbench/services`,
-    `${exports.outSrcDir}/client/workbench/workers`,
+    `${exports.outSrcDir}/client/workbench/workers/alias`,
     `${exports.outSrcDir}/client/workbench/static_resource`,
     `${exports.outSrcDir}/client/workbench/utils`,
     `${exports.outSrcDir}/client/workbench/apps/backService/electron-main/backServiceMain.js`,

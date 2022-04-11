@@ -11,7 +11,7 @@ export const LightCodeChannelCommand = {
 	}
 }
 
-type ILowcodeAppName = string
+type ILightCodeAppName = string
 
 export enum StepTypeCode {
 	none = '',
@@ -26,6 +26,6 @@ export interface ILightCodeStepItem {
 }
 
 export interface ILightCodeApp {
-	name: ILowcodeAppName,
+	name: ILightCodeAppName,
 	steps: ILightCodeStepItem[]
 }

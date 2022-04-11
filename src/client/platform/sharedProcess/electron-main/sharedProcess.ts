@@ -116,6 +116,7 @@ export class SharedProcess {
 				preload: path.join(__dirname, '../../../base/parts/sandbox/electron_browser/preload.js'),
 				additionalArguments: [`--client-window-config=${fileFromClientResource('').toString()}`, `--user-data-path=${fileFromUserDataCommon('').toString()}`, `--app-name=${AppItemName.Shared_Process}`, `--is-packaged=${Number(app.isPackaged)}`, `--env-${env}`],
 				nodeIntegration: true,
+				nodeIntegrationInWorker: true,
 				contextIsolation: false,
 				enableWebSQL: false,
 				spellcheck: false,
