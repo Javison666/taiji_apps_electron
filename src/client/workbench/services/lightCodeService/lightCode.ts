@@ -1,4 +1,4 @@
-import InstructorSystemCommandType from 'client/workbench/services/lightCodeService/types/lightCodeSystemType'
+import LightCodeNode from 'client/workbench/services/lightCodeService/node/lightCodeNode'
 import {
 	commandText,
 	ILightCodeCommand,
@@ -9,40 +9,44 @@ import {
 const space = ' '
 const LightCodeFormatError = 'lightcode format wrong '
 
-class LightCodeDecoder {
-	public static readonly INSTANCE = new LightCodeDecoder()
+interface IDecodeLightCodeTextOpt {
+	singleCommandRun: (command: ILightCodeCommand) => void
+}
 
-	test() {
-		// test code
-		const fs = require('fs')
-		// let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
-		let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹')
+class LightCode {
 
-		LightCodeDecoder.INSTANCE.decodeLightCodeText(content.toString())
+	private _text = ''
+
+	constructor(text: commandText) {
+		this._text = text
+		this.init()
 	}
 
-	decodeLightCodeText(text: commandText) {
-		let pt = 0, singleCommandLength = text.substring(pt, pt + 8)
+	init() {
+
+	}
+
+	decodeLightCodeText(opt: IDecodeLightCodeTextOpt) {
+		let pt = 0, singleCommandLength = this._text.substring(pt, pt + 8)
 		while (/^[0-9a-f]{8}$/.test(singleCommandLength)) {
 			let command_length = parseInt(singleCommandLength, 16), commandStr = ''
-			console.log('command_length', command_length)
 			pt += 8
-			if (text[pt] !== space) {
+			if (this._text[pt] !== space) {
 				throw new Error(LightCodeFormatError + ' 10001')
 			}
 
 			let lightCodeCommand: ILightCodeCommand = {
 				platformType: InstructorPlatformType.Full,
 				categoryType: InstructorCategoryType.System,
-				commandType: InstructorSystemCommandType.None,
+				commandType: 0,
 				payload: ''
 			}
 			pt++
-			while (/^[0-9a-f_]$/.test(text[pt])) {
-				commandStr += text[pt]
+			while (/^[0-9a-f_]$/.test(this._text[pt])) {
+				commandStr += this._text[pt]
 				pt++
 			}
-			if (text[pt] !== space) {
+			if (this._text[pt] !== space) {
 				throw new Error(LightCodeFormatError + ' 10002')
 			}
 			pt++
@@ -50,7 +54,7 @@ class LightCodeDecoder {
 			if (payloadLength < 0) {
 				throw new Error(LightCodeFormatError + ' 10003')
 			}
-			let payload = text.substring(pt, pt + payloadLength)
+			let payload = this._text.substring(pt, pt + payloadLength)
 			if (payload.length !== payloadLength) {
 				throw new Error(LightCodeFormatError + ' 10004')
 			}
@@ -67,15 +71,16 @@ class LightCodeDecoder {
 			}
 			lightCodeCommand.payload = payload
 
-			console.log('lightCodeCommand', lightCodeCommand)
+			// run
+			opt.singleCommandRun && typeof opt.singleCommandRun === 'function' && opt.singleCommandRun(lightCodeCommand)
 
 			// end check
 			pt += payloadLength + 1
-			if (text[pt] !== '\n') {
+			if (this._text[pt] !== '\n') {
 				break
 			} else {
 				pt++
-				singleCommandLength = text.substring(pt, pt + 8)
+				singleCommandLength = this._text.substring(pt, pt + 8)
 			}
 		}
 	}
@@ -84,8 +89,18 @@ class LightCodeDecoder {
 	}
 }
 
-export default LightCodeDecoder
+// export default LightCode
+export const test = () => {
+	// test code
+	const fs = require('fs')
+	// let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
+	let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹')
 
+	const lightCode = new LightCode(content.toString())
+	LightCodeNode.INSTANCE.run(lightCode)
+}
+
+export default LightCode
 
 
 
