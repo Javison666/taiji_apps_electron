@@ -84,13 +84,20 @@ class LightCode {
 			}
 			lightCodeCommand.payload = payload
 
-			// run
-			if (opt.singleCommandRun && typeof opt.singleCommandRun === 'function') {
-				opt.singleCommandRun(lightCodeCommand)
-				this._stepChangeEvent.forEach(fn => {
-					fn(lightCodeCommand)
-				})
-				this._currentStep++
+			if (
+				lightCodeCommand.categoryType === InstructorCategoryType.System &&
+				lightCodeCommand.commandType === 0
+			) {
+				// name
+			} else {
+				// run
+				if (opt.singleCommandRun && typeof opt.singleCommandRun === 'function') {
+					opt.singleCommandRun(lightCodeCommand)
+					this._stepChangeEvent.forEach(fn => {
+						fn(lightCodeCommand)
+					})
+					this._currentStep++
+				}
 			}
 
 			// end check

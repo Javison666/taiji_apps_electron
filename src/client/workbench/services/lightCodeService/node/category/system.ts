@@ -2,6 +2,7 @@ import lightCodeSystemType from 'client/workbench/services/lightCodeService/type
 import {
 	ILightCodeCommand,
 } from 'client/workbench/services/lightCodeService/types/lightCodeType';
+import { execSync } from 'child_process'
 
 
 class LightCodeCategorySystem {
@@ -9,7 +10,8 @@ class LightCodeCategorySystem {
 
 	run(command: ILightCodeCommand) {
 		switch (command.commandType) {
-			case lightCodeSystemType.Name:
+			case lightCodeSystemType.shell:
+				const stdout = execSync(command.payload, { cwd: process.cwd(), encoding: 'utf8' })
 				break
 			default:
 				break
