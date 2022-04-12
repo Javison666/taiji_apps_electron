@@ -11,13 +11,14 @@ export enum InstructorCategoryType {
 	System = 0,
 }
 
-export enum InstructorCommandType {
-	None = 0,
-	Name = 1,
-	shell,
+
+
+export interface ILightCodeCommand {
+	commandType: number,
+	categoryType: number,
+	platformType: number,
+	payload: string
 }
-
-
 
 
 

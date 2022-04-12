@@ -1,9 +1,10 @@
+import InstructorSystemCommandType from 'client/workbench/services/lightCodeService/types/lightCodeSystemType'
 import {
 	commandText,
-	// InstructorCategoryType,
-	// InstructorCommandType,
-	// InstructorPlatformType
-} from 'client/workbench/services/lightCodeService/lightCodeType'
+	ILightCodeCommand,
+	InstructorCategoryType,
+	InstructorPlatformType
+} from 'client/workbench/services/lightCodeService/types/lightCodeType'
 
 const space = ' '
 const LightCodeFormatError = 'lightcode format wrong '
@@ -11,19 +12,17 @@ const LightCodeFormatError = 'lightcode format wrong '
 class LightCodeDecoder {
 	public static readonly INSTANCE = new LightCodeDecoder()
 
-	static getPointAddressFromText(text: string, pt: number) {
-		return text.substring(pt, pt + 8)
-	}
-
 	test() {
 		// test code
 		const fs = require('fs')
-		let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
-		LightCodeDecoder.INSTANCE.decodeCommandText(content.toString())
+		// let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
+		let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹')
+
+		LightCodeDecoder.INSTANCE.decodeLightCodeText(content.toString())
 	}
 
-	decodeCommandText(text: commandText) {
-		let pt = 0, singleCommandLength = LightCodeDecoder.getPointAddressFromText(text, pt)
+	decodeLightCodeText(text: commandText) {
+		let pt = 0, singleCommandLength = text.substring(pt, pt + 8)
 		while (/^[0-9a-f]{8}$/.test(singleCommandLength)) {
 			let command_length = parseInt(singleCommandLength, 16), commandStr = ''
 			console.log('command_length', command_length)
@@ -32,11 +31,12 @@ class LightCodeDecoder {
 				throw new Error(LightCodeFormatError + ' 10001')
 			}
 
-			// let lightCodeCommand = {
-			// 	platformType: InstructorPlatformType.Full,
-			// 	categoryType: InstructorCategoryType.System,
-			// 	CommandType: InstructorCommandType.None
-			// }
+			let lightCodeCommand: ILightCodeCommand = {
+				platformType: InstructorPlatformType.Full,
+				categoryType: InstructorCategoryType.System,
+				commandType: InstructorSystemCommandType.None,
+				payload: ''
+			}
 			pt++
 			while (/^[0-9a-f_]$/.test(text[pt])) {
 				commandStr += text[pt]
@@ -54,14 +54,28 @@ class LightCodeDecoder {
 			if (payload.length !== payloadLength) {
 				throw new Error(LightCodeFormatError + ' 10004')
 			}
-			console.log('commandStr:', commandStr, commandStr.length)
-			console.log('payload:', payload, payload.length)
+
+			const commandList: string[] = commandStr.split('_')
+			if (/^[0-9a-f]{1,}$/.test(commandList[0])) {
+				lightCodeCommand.commandType = parseInt(commandList[0], 16)
+			}
+			if (/^[0-9a-f]{1,}$/.test(commandList[1])) {
+				lightCodeCommand.categoryType = parseInt(commandList[1], 16)
+			}
+			if (/^[0-9a-f]{1,}$/.test(commandList[2])) {
+				lightCodeCommand.platformType = parseInt(commandList[2], 16)
+			}
+			lightCodeCommand.payload = payload
+
+			console.log('lightCodeCommand', lightCodeCommand)
+
+			// end check
 			pt += payloadLength + 1
 			if (text[pt] !== '\n') {
 				break
 			} else {
 				pt++
-				singleCommandLength = LightCodeDecoder.getPointAddressFromText(text, pt)
+				singleCommandLength = text.substring(pt, pt + 8)
 			}
 		}
 	}
