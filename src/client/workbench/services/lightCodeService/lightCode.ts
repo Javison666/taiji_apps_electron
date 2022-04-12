@@ -13,9 +13,13 @@ interface IDecodeLightCodeTextOpt {
 	singleCommandRun: (command: ILightCodeCommand) => void
 }
 
+type StepChangeFn = (command: ILightCodeCommand) => void
+
 class LightCode {
 
 	private _text = ''
+	private _currentStep = 0
+	private _stepChangeEvent: Set<StepChangeFn> = new Set()
 
 	constructor(text: commandText) {
 		this._text = text
@@ -24,6 +28,14 @@ class LightCode {
 
 	init() {
 
+	}
+
+	registerStepChange(fn: StepChangeFn) {
+		this._stepChangeEvent.add(fn)
+	}
+
+	unregisterStepChange(fn: StepChangeFn) {
+		this._stepChangeEvent.delete(fn)
 	}
 
 	decodeLightCodeText(opt: IDecodeLightCodeTextOpt) {
@@ -36,6 +48,7 @@ class LightCode {
 			}
 
 			let lightCodeCommand: ILightCodeCommand = {
+				step: this._currentStep,
 				platformType: InstructorPlatformType.Full,
 				categoryType: InstructorCategoryType.System,
 				commandType: 0,
@@ -72,7 +85,13 @@ class LightCode {
 			lightCodeCommand.payload = payload
 
 			// run
-			opt.singleCommandRun && typeof opt.singleCommandRun === 'function' && opt.singleCommandRun(lightCodeCommand)
+			if (opt.singleCommandRun && typeof opt.singleCommandRun === 'function') {
+				opt.singleCommandRun(lightCodeCommand)
+				this._stepChangeEvent.forEach(fn => {
+					fn(lightCodeCommand)
+				})
+				this._currentStep++
+			}
 
 			// end check
 			pt += payloadLength + 1

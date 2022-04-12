@@ -12,11 +12,11 @@ class LightCodeNode {
 			singleCommandRun: (command: ILightCodeCommand) => {
 				switch (command.categoryType) {
 					case InstructorCategoryType.System:
-						LightCodeCategorySystem.INSTANCE.run(command)
-						break
+						return LightCodeCategorySystem.INSTANCE.run(command)
 					default:
 						break;
 				}
+				return
 			}
 		})
 	}

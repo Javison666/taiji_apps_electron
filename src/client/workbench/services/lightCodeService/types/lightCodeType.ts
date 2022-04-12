@@ -14,6 +14,7 @@ export enum InstructorCategoryType {
 
 
 export interface ILightCodeCommand {
+	step: number,
 	commandType: number,
 	categoryType: number,
 	platformType: number,
