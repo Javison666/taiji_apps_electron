@@ -1,5 +1,5 @@
 import LightCode from 'client/workbench/services/lightCodeService/lightCode';
-import { ILightCodeCommand, InstructorCategoryType } from 'client/workbench/services/lightCodeService/types/lightCodeType';
+import { CommandPayloadDataType, ILightCodeCommand, InstructorCategoryType } from 'client/workbench/services/lightCodeService/types/lightCodeType';
 import LightCodeCategorySystem from './category/system/LightCodeCategorySystem'
 
 
@@ -21,14 +21,21 @@ class LightCodeNode {
 		})
 	}
 
-	public decodePayload(payload: string) {
-		let params = []
-		if (payload.length > 0) {
-			console.log('payload', payload)
-			params = JSON.parse(payload)
+	public decodeCommandPayload(command: ILightCodeCommand): any {
+		let params = ''
+		switch (command.payloadDataType) {
+			case CommandPayloadDataType.Text:
+				break
+			case CommandPayloadDataType.Json:
+				params = JSON.parse(command.payload)
+				break
+			default:
+				break
 		}
 		return params
 	}
+
 }
+
 
 export default LightCodeNode

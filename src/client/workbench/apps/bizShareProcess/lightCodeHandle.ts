@@ -8,7 +8,10 @@ import LightCodeService, { ITaskConf } from 'client/workbench/services/lightCode
 import { fileFromUserDataCommon } from 'client/base/common/network'
 import { test } from 'client/workbench/services/lightCodeService/lightCode'
 
-test()
+setTimeout(() => {
+	test()
+}, 5000)
+
 
 export const lightCodeDir = fileFromUserDataCommon('./backdata/ttcode')
 

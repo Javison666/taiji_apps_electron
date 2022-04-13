@@ -4,7 +4,7 @@ import LightCodeNode from 'client/workbench/services/lightCodeService/node/light
 import { ILightCodeCommand, CommandRunStatusType } from 'client/workbench/services/lightCodeService/types/lightCodeType'
 
 export default (command: ILightCodeCommand, lightCode: LightCode) => {
-	const payloadData = LightCodeNode.INSTANCE.decodePayload(command.payload)
+	const payloadData: any[] = LightCodeNode.INSTANCE.decodeCommandPayload(command)
 	execSync(payloadData[0], payloadData[1] ? payloadData[1] : {})
 	command.statusType = CommandRunStatusType.Finished
 	command.statusDesc = ''

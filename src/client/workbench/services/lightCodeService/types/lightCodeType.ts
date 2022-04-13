@@ -20,6 +20,7 @@ export enum CommandRunStatusType {
 }
 
 export enum CommandPayloadDataType {
+	Text,
 	Json
 }
 

@@ -78,7 +78,7 @@ class LightCode {
 				commandType: 0,
 				relyOutSteps: [],
 				payload: '',
-				payloadDataType: CommandPayloadDataType.Json
+				payloadDataType: CommandPayloadDataType.Text
 			}
 			pt++
 			while (/^[0-9a-f_]$/.test(this._text[pt])) {
@@ -101,8 +101,11 @@ class LightCode {
 				lightCodeCommand.platformType = parseInt(commandList[2], 16)
 			}
 			if (commandReg.test(commandList[3])) {
+				lightCodeCommand.payloadDataType = parseInt(commandList[3], 16)
+			}
+			if (commandReg.test(commandList[4])) {
 				// ready for decode add field in the future
-				const addtionLength = parseInt(commandList[3], 16)
+				const addtionLength = parseInt(commandList[4], 16)
 				// use for global or block vairable
 				// const addtionPayload = this._text.substring(pt, pt + addtionLength)
 				if (addtionLength > 0) {
@@ -111,10 +114,6 @@ class LightCode {
 						throw new Error(LightCodeFormatError + ' 10003')
 					}
 				}
-			}
-
-			if (commandReg.test(commandList[4])) {
-				lightCodeCommand.payloadDataType = parseInt(commandList[4], 16)
 			}
 
 			pt++
