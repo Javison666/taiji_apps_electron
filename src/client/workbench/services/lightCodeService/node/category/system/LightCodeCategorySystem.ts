@@ -1,17 +1,18 @@
-import lightCodeSystemType from 'client/workbench/services/lightCodeService/types/lightCodeSystemType';
+import lightCodeSystemType from 'client/workbench/services/lightCodeService/node/lightCodeSystemType';
 import {
 	ILightCodeCommand,
 } from 'client/workbench/services/lightCodeService/types/lightCodeType';
-import { execSync } from 'child_process'
+import LightCode from 'client/workbench/services/lightCodeService/lightCode';
 
+import execSync from './execSync'
 
 class LightCodeCategorySystem {
 	public static readonly INSTANCE = new LightCodeCategorySystem()
 
-	run(command: ILightCodeCommand) {
+	run(command: ILightCodeCommand, lightCode: LightCode) {
 		switch (command.commandType) {
 			case lightCodeSystemType.shell:
-				const stdout = execSync(command.payload, { cwd: process.cwd(), encoding: 'utf8' })
+				execSync(command, lightCode)
 				break
 			default:
 				break

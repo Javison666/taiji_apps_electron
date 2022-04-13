@@ -1,5 +1,7 @@
 import LightCodeNode from 'client/workbench/services/lightCodeService/node/lightCodeNode'
 import {
+	CommandPayloadDataType,
+	CommandRunStatusType,
 	commandText,
 	ILightCodeCommand,
 	InstructorCategoryType,
@@ -14,12 +16,15 @@ interface IDecodeLightCodeTextOpt {
 }
 
 type StepChangeFn = (command: ILightCodeCommand) => void
+type StepNumber = number
+type StepOut = any
 
 class LightCode {
 
 	private _text = ''
 	private _currentStep = 0
 	private _stepChangeEvent: Set<StepChangeFn> = new Set()
+	private _stepOutMap: Map<StepNumber, { finalUseStep: StepNumber, out: StepOut }> = new Map()
 
 	constructor(text: commandText) {
 		this._text = text
@@ -38,6 +43,23 @@ class LightCode {
 		this._stepChangeEvent.delete(fn)
 	}
 
+	emitStepChange(command: ILightCodeCommand) {
+		// when finished destroy not used stepOut
+		if (command.statusType > CommandRunStatusType.Runing) {
+			command.relyOutSteps.forEach(relyStep => {
+				let stepOutItem = this._stepOutMap.get(relyStep)
+				if (stepOutItem && stepOutItem.finalUseStep <= command.step) {
+					this._stepOutMap.delete(relyStep)
+				}
+			})
+		}
+
+		// notify stepChange
+		this._stepChangeEvent.forEach(fn => {
+			fn(command)
+		})
+	}
+
 	decodeLightCodeText(opt: IDecodeLightCodeTextOpt) {
 		let pt = 0, singleCommandLength = this._text.substring(pt, pt + 8)
 		while (/^[0-9a-f]{8}$/.test(singleCommandLength)) {
@@ -49,10 +71,14 @@ class LightCode {
 
 			let lightCodeCommand: ILightCodeCommand = {
 				step: this._currentStep,
+				statusType: CommandRunStatusType.Ready,
+				statusDesc: '',
 				platformType: InstructorPlatformType.Full,
 				categoryType: InstructorCategoryType.System,
 				commandType: 0,
-				payload: ''
+				relyOutSteps: [],
+				payload: '',
+				payloadDataType: CommandPayloadDataType.Json
 			}
 			pt++
 			while (/^[0-9a-f_]$/.test(this._text[pt])) {
@@ -62,26 +88,45 @@ class LightCode {
 			if (this._text[pt] !== space) {
 				throw new Error(LightCodeFormatError + ' 10002')
 			}
+
+			const commandList: string[] = commandStr.split('_')
+			const commandReg = /^[0-9a-f]{1,}$/
+			if (commandReg.test(commandList[0])) {
+				lightCodeCommand.commandType = parseInt(commandList[0], 16)
+			}
+			if (commandReg.test(commandList[1])) {
+				lightCodeCommand.categoryType = parseInt(commandList[1], 16)
+			}
+			if (commandReg.test(commandList[2])) {
+				lightCodeCommand.platformType = parseInt(commandList[2], 16)
+			}
+			if (commandReg.test(commandList[3])) {
+				// ready for decode add field in the future
+				const addtionLength = parseInt(commandList[3], 16)
+				// use for global or block vairable
+				// const addtionPayload = this._text.substring(pt, pt + addtionLength)
+				if (addtionLength > 0) {
+					pt += addtionLength + 1
+					if (this._text[pt] !== space) {
+						throw new Error(LightCodeFormatError + ' 10003')
+					}
+				}
+			}
+
+			if (commandReg.test(commandList[4])) {
+				lightCodeCommand.payloadDataType = parseInt(commandList[4], 16)
+			}
+
 			pt++
 			let payloadLength = command_length - 10 - commandStr.length
 			if (payloadLength < 0) {
-				throw new Error(LightCodeFormatError + ' 10003')
+				throw new Error(LightCodeFormatError + ' 10004')
 			}
 			let payload = this._text.substring(pt, pt + payloadLength)
 			if (payload.length !== payloadLength) {
-				throw new Error(LightCodeFormatError + ' 10004')
+				throw new Error(LightCodeFormatError + ' 10005')
 			}
 
-			const commandList: string[] = commandStr.split('_')
-			if (/^[0-9a-f]{1,}$/.test(commandList[0])) {
-				lightCodeCommand.commandType = parseInt(commandList[0], 16)
-			}
-			if (/^[0-9a-f]{1,}$/.test(commandList[1])) {
-				lightCodeCommand.categoryType = parseInt(commandList[1], 16)
-			}
-			if (/^[0-9a-f]{1,}$/.test(commandList[2])) {
-				lightCodeCommand.platformType = parseInt(commandList[2], 16)
-			}
 			lightCodeCommand.payload = payload
 
 			if (
@@ -92,12 +137,11 @@ class LightCode {
 			} else {
 				// run
 				if (opt.singleCommandRun && typeof opt.singleCommandRun === 'function') {
+					lightCodeCommand.statusType = CommandRunStatusType.Runing
+					this.emitStepChange(lightCodeCommand)
 					opt.singleCommandRun(lightCodeCommand)
-					this._stepChangeEvent.forEach(fn => {
-						fn(lightCodeCommand)
-					})
-					this._currentStep++
 				}
+				this._currentStep++
 			}
 
 			// end check
@@ -120,7 +164,7 @@ export const test = () => {
 	// test code
 	const fs = require('fs')
 	// let content = fs.readFileSync('/Users/jiweiqing/Desktop/test/test.lc')
-	let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹')
+	let content = fs.readFileSync('C:\\Users\\EDZ\\Desktop\\新建文件夹\\test.lc')
 
 	const lightCode = new LightCode(content.toString())
 	LightCodeNode.INSTANCE.run(lightCode)

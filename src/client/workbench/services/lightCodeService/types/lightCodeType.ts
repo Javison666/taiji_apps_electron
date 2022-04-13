@@ -1,36 +1,36 @@
 export type commandText = string
 
 export enum InstructorPlatformType {
-	Full = 0,
-	Windows = 1,
-	MacOs = 2,
-	Linux = 3
+	Full,
+	Windows,
+	MacOs,
+	Linux3
 }
 
 export enum InstructorCategoryType {
-	System = 0,
+	System,
+	Node,
 }
 
+export enum CommandRunStatusType {
+	Ready,
+	Runing,
+	Failed,
+	Finished
+}
 
+export enum CommandPayloadDataType {
+	Json
+}
 
 export interface ILightCodeCommand {
 	step: number,
+	statusType: CommandRunStatusType,
+	statusDesc: string,
 	commandType: number,
 	categoryType: number,
 	platformType: number,
-	payload: string
+	relyOutSteps: number[],
+	payload: string,
+	payloadDataType: CommandPayloadDataType
 }
-
-
-
-// // 与创建的子进程进行通讯
-// export enum LightCodeTaskCmdType {
-// 	C2M_ChildProcessInit = 'C2M_ChildProcessInit',
-// 	M2C_LightCodeTask = 'M2C_LightCodeTask'
-// }
-
-// // 与创建的子进程进行通讯协议体
-// export interface ILightCodeTask<T> {
-// 	cmd: LightCodeTaskCmdType,
-// 	data: T
-// }
