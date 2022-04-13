@@ -3,19 +3,20 @@ import {
 	CommandPayloadDataType,
 	CommandRunStatusType,
 	commandText,
-	ILightCodeCommand,
-	InstructorCategoryType,
-	InstructorPlatformType
+	ILightCodeCommandBase,
+	ILightCodeCommandRun,
+	CommandCategoryType,
+	CommandPlatformType
 } from 'client/workbench/services/lightCodeService/types/lightCodeType'
 
 const space = ' '
 const LightCodeFormatError = 'lightcode format wrong '
 
 interface IDecodeLightCodeTextOpt {
-	singleCommandRun: (command: ILightCodeCommand) => void
+	singleCommandRun: (command: ILightCodeCommandRun) => void
 }
 
-type StepChangeFn = (command: ILightCodeCommand) => void
+type StepChangeFn = (command: ILightCodeCommandRun) => void
 type StepNumber = number
 type StepOut = any
 
@@ -43,7 +44,8 @@ class LightCode {
 		this._stepChangeEvent.delete(fn)
 	}
 
-	emitStepChange(command: ILightCodeCommand) {
+	emitStepChange(command: ILightCodeCommandRun) {
+
 		// when finished destroy not used stepOut
 		if (command.statusType > CommandRunStatusType.Runing) {
 			command.relyOutSteps.forEach(relyStep => {
@@ -52,12 +54,28 @@ class LightCode {
 					this._stepOutMap.delete(relyStep)
 				}
 			})
+
+			if (command.statusType === CommandRunStatusType.Finished) {
+				let stepOutItem = this._stepOutMap.get(this._currentStep)
+				if (stepOutItem) {
+					stepOutItem.out = command.out
+				}
+			}
 		}
 
 		// notify stepChange
 		this._stepChangeEvent.forEach(fn => {
 			fn(command)
 		})
+	}
+
+	encodeLightCode(commands: ILightCodeCommandBase[]) {
+		let text = ''
+		for (let command of commands) {
+			let commandStr = ` ${command.commandType}_${command.categoryType}_${command.platformType}_${command.payloadDataType} ${command.payload}`
+			text += `${Number(commandStr.length + 8).toString(16)} ${commandStr} ${command.payload}`
+		}
+		return text
 	}
 
 	decodeLightCodeText(opt: IDecodeLightCodeTextOpt) {
@@ -69,16 +87,17 @@ class LightCode {
 				throw new Error(LightCodeFormatError + ' 10001')
 			}
 
-			let lightCodeCommand: ILightCodeCommand = {
+			let lightCodeCommand: ILightCodeCommandRun = {
 				step: this._currentStep,
 				statusType: CommandRunStatusType.Ready,
 				statusDesc: '',
-				platformType: InstructorPlatformType.Full,
-				categoryType: InstructorCategoryType.System,
+				platformType: CommandPlatformType.Full,
+				categoryType: CommandCategoryType.System,
 				commandType: 0,
 				relyOutSteps: [],
 				payload: '',
-				payloadDataType: CommandPayloadDataType.Text
+				payloadDataType: CommandPayloadDataType.Text,
+				out: null
 			}
 			pt++
 			while (/^[0-9a-f_]$/.test(this._text[pt])) {
@@ -129,7 +148,7 @@ class LightCode {
 			lightCodeCommand.payload = payload
 
 			if (
-				lightCodeCommand.categoryType === InstructorCategoryType.System &&
+				lightCodeCommand.categoryType === CommandCategoryType.System &&
 				lightCodeCommand.commandType === 0
 			) {
 				// name

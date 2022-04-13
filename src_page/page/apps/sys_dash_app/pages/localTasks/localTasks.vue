@@ -16,7 +16,7 @@
         <span class="flex-grow text-left">{{ item }}</span>
         <a href="#" class="mr-2" @click.prevent="runLightCodeTaskByName(item)">运行</a>
         <router-link :to="'/localTasks/lightCode?status=edit&name=' + item" class="mr-2">修改</router-link>
-        <a href="#" @click.prevent="dellightCode(item)">删除</a>
+        <a href="#" @click.prevent="delLightCode(item)">删除</a>
       </div>
     </div>
   </div>
@@ -36,7 +36,7 @@ export default defineComponent({
       delLightCodeTaskByName
     } = useLightCode();
 
-    const dellightCode = async (name: string) => {
+    const delLightCode = async (name: string) => {
       await delLightCodeTaskByName(name)
       initLightCodeList()
     }
@@ -47,7 +47,7 @@ export default defineComponent({
       lightCodeAppList,
       initLightCodeList,
       runLightCodeTaskByName,
-      dellightCode
+      delLightCode
     };
   },
 });

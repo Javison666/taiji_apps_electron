@@ -1,20 +1,23 @@
 export type commandText = string
 
-export enum InstructorPlatformType {
+export enum CommandPlatformType {
 	Full,
 	Windows,
-	MacOs,
-	Linux3
+	Mac,
+	Linux
 }
 
-export enum InstructorCategoryType {
+export enum CommandCategoryType {
 	System,
 	Node,
+	Browser,
+	Electron,
 }
 
 export enum CommandRunStatusType {
 	Ready,
 	Runing,
+	Skip,
 	Failed,
 	Finished
 }
@@ -24,14 +27,19 @@ export enum CommandPayloadDataType {
 	Json
 }
 
-export interface ILightCodeCommand {
+export interface ILightCodeCommandBase {
 	step: number,
-	statusType: CommandRunStatusType,
-	statusDesc: string,
 	commandType: number,
 	categoryType: number,
 	platformType: number,
 	relyOutSteps: number[],
 	payload: string,
-	payloadDataType: CommandPayloadDataType
+	payloadDataType: CommandPayloadDataType,
+}
+
+export interface ILightCodeCommandRun extends ILightCodeCommandBase {
+	statusType: CommandRunStatusType,
+	statusDesc: string,
+	relyOutSteps: number[],
+	out: any
 }
